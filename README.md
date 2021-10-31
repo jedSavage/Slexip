@@ -56,49 +56,84 @@ Upon initialization or when a reset instruction is encountered:
 
 There are 32 operations. Only the lower 5 bits of a pixel represent the operation so they repeat after $00 to $1F: $20 to $3F, $40 to $5F, etc... Up to $FE. $FF is the reset instruction and does not repeat. This repetition allows some freedom in choosing more than one color index where an instruction sits. For example, the color indexes $0E, $2E, $4E, $6E, $8E, $AE, $CE, and $EE are all INC instructions.
 
+### Reset
 **RST:** $FF - Reset - Runs the interpreter's initialization routine, resets all caches references to pointer. [] 1-Byte Instruction
 
+### Data Transport Operations
 **CVM:** $00 - Copy a value into memory - Set/clears the following flags: [ZN] 4-Byte Instruction
+
 **CMM:** $01 - Copy from one memory address to another. [ZN] 5-Byte Instruction
 
+### Arithmetic Opertions
 **ADC:** $02 - Add (with carry) two memory values, replacing the second location with result. [CZVN] 5-Byte Instruction
+
 **SBC:** $03 - Subtract (with borrow) two memory values, replacing the second location with result. The first value gets subtracted from the second. [CZVN] 5-Byte Instruction
 
-**CLC:** $04 - Clear the carry flag. [C] 1-Byte Instruction
-**SEC:** $05 - Set the carry flag. [C] 1-Byte Instruction
-**CLV:** $06 - Clear overflow flag [V] 1-Byte Instruction
+**INC:** $04 - Increment memory by one. [ZN] 3-Byte Instruction
 
-**AND:** $07 - Logical AND two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
-**ORM:** $08 - Logical OR two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
-**XOR:** $09 - Logical XOR two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
+**DEC:** $05 - Decrement memory by one. [ZN] 3-Byte Instruction
 
-**SHL:** $0A - Shifts all bits of a memory location left one position. 0 is shifted into bit-0 and the original bit-7 is shifted into the Carry. [CZN] 1-Byte Instruction
-**SHR:** $0B - Shifts all bits of a memory location right one position. 0 is shifted into bit-7 and the original bit-0 is shifted into the Carry. [CZN] 1-Byte Instruction
-**ROL:** $0C - Shifts all bits of a memory location left one position. The Carry is shifted into bit 0 and the original bit 7 is shifted into the Carry. [CZN] 1-Byte Instruction
-**ROR:** $0D - Shifts all bits of a memory location right one position. The Carry is shifted into bit 7 and the original bit 0 is shifted into the Carry. [CZN] 1-Byte Instruction
+### Status Operations
+**CLC:** $06 - Clear the carry flag. [C] 1-Byte Instruction
 
-**INC:** $0E - Increment memory by one. [ZN] 3-Byte Instruction
-**DEC:** $0F - Decrement memory by one. [ZN] 3-Byte Instruction
+**SEC:** $07 - Set the carry flag. [C] 1-Byte Instruction
 
+**CLV:** $08 - Clear overflow flag [V] 1-Byte Instruction
+
+### Logical Operations
+**AND:** $09 - Logical AND two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
+
+**ORM:** $0A - Logical OR two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
+
+**XOR:** $0B - Logical XOR two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
+
+**SHL:** $0C - Shifts all bits of a memory location left one position. 0 is shifted into bit-0 and the original bit-7 is shifted into the Carry. [CZN] 1-Byte Instruction
+
+**SHR:** $0D - Shifts all bits of a memory location right one position. 0 is shifted into bit-7 and the original bit-0 is shifted into the Carry. [CZN] 1-Byte Instruction
+
+**ROL:** $0E - Shifts all bits of a memory location left one position. The Carry is shifted into bit 0 and the original bit 7 is shifted into the Carry. [CZN] 1-Byte Instruction
+
+**ROR:** $0F - Shifts all bits of a memory location right one position. The Carry is shifted into bit 7 and the original bit 0 is shifted into the Carry. [CZN] 1-Byte Instruction
+
+### Branch Operations
 **BCC:** $10 - Branch on carry clear. Branch to address if the carry flag is clear. (Sets the PC to a the new memory address). [] 3-Byte Instruction
+
 **BCS:** $11 - Branch on carry set. Branch if the carry flag is set. [] 3-Byte Instruction
+
 **BNE:** $12 - Branch on non-zero. Branch if the zero flag is clear. [] 3-Byte Instruction
+
 **BEQ:** $13 - Branch on zero. Branch if the zero flag is set. [] 3-Byte Instruction
+
 **BPL:** $14 - Branch on positive. Branch if the negative flag is clear. [] 3-Byte Instruction
+
 **BMI:** $15 - Branch on negative. Branch if the negative flag is set. [] 3-Byte Instruction
+
 **BVC:** $16 - Branch on overflow clear. Branch if the overflow flag is clear [] 3-Byte Instruction
+
 **BVS:** $17 - Branch on overflow set. Branch if the overflow flag is set. [] 3-Byte Instruction
 
+### Comparison Operations
 **CMM:** $18 - Compare two memory locations. Sets zero flag if values are identical. Sets carry flag if the first memory value is equal to or greater than the second memory value. [CZN] 5-Byte Instruction
 
+### Program Control
 **JMP:** $19 - Set PC to new value, altering flow of program.[] 3-Byte Instruction
+
 **JSR:** $1A - Jump sub routine. Pushes the address of the next operation to the stack, then sets the PC to a new memory value. [] 3-Byte Instruction
+
 **RSR:** $1B - Return from subroutine, pop the stack value into the PC and continues evaluating from there. [] 1-Byte Instruction
 
+### Stack Operations
 **PHM:** $1C - Push memory to stack. [] 3-Byte Instruction
+
 **PHS:** $1D - Push status to stack. [] 1-Byte Instruction
+
 **PLM:** $1E - Pop from stack into memory locaton. [ZN] 3-Byte Instruction
+
 **PLS:** $1F - Pop from stack into status register. [CZVN] 1-Byte Instruction
 
+### Null Operations
 **NOP:** $20-$2F: No Operation - Does nothing. [] 3-Byte Instruction
+
+
+
 
