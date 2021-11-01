@@ -92,7 +92,7 @@ The value at the memory location is fetched and the value at the index location 
 
 ## Instruction Set:
 
-There are 64 operations which repeat after $3F: $40 to $7F, $80 to $BF, etc. This repetition allows some freedom in choosing more than one color index for an operation. For example, the color indexes $35, $75, $B5, and $F5 are all INC instructions.
+There are 64 operators which repeat every 64 bytes. This repetition allows some freedom in choosing more than one color index for each operation. For example, the color indexes $35, $75, $B5, and $F5 are all INC operators. The reset operator is $FF and is not repeated.  All other $xF opcodes are NOP instructions.
 
 ![](/image/Opcode-Matrix.png)
 
@@ -419,5 +419,17 @@ Flags Affected: [CZVNDD]
 |Addressing Mode|Instruction Format|
 |---:|:---|
 |Implied    |$3F, $8F and $BF|
+
+Flags Affected: [------]
+
+### Null Operations
+
+I = Index number; R = Red value; G = Green Value; B = Blue Value.
+
+**IDX** Index Color Modifier - Instructs the interpreter to change the color of an index.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct    |$2F I R B G|
 
 Flags Affected: [------]
