@@ -1,5 +1,7 @@
 # SLEXIP
 
+***Note: this project is currently in a conceptual phase - it is just an idea. No interpreter has been made yet. Suggestions and requests to the specifications are welcome. Please submit ideas/feedback through issues.***
+
 SLEXIP is a low level programming language inspired by Piet and the 6502 microprocessor. It is not as esoteric as Piet but still visually represents code as pixels.
 
 ## Data Representation
