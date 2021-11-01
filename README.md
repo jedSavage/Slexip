@@ -71,7 +71,7 @@ In implied mode, the data and/or memory that the operation works with is implied
 ### Non-Indexed
 
 #### Relative (R)
-This mode is only available with branch operations. The number provided to the operation is added to current PC and program execution continues from that address. Maximum value is 255.
+This mode is only available with branch operations. The number provided to the operation is added to current PC and program execution continues from that address. Only one byte is passed and it is a signed byte. This allows a jump of -128 to +127 bytes relative to the current program counter.
 
 #### Direct (D)
 Uses the value directly as entered.  Example, using the JMP operation in direct mode, the PC is set to the value provided and program execution continues from that address.
@@ -92,189 +92,332 @@ The value at the memory location is fetched and the value at the index location 
 
 ## Instruction Set:
 
-There are 64 operations which repeatafter $3F: $40 to $7F, $80 to $BF, etc. This repetition allows some freedom in choosing more than one color index for an operation. For example, the color indexes $35, $75, $B5, and $F5 are all INC instructions.
+There are 64 operations which repeat after $3F: $40 to $7F, $80 to $BF, etc. This repetition allows some freedom in choosing more than one color index for an operation. For example, the color indexes $35, $75, $B5, and $F5 are all INC instructions.
 
-![](/image/Opcode%20Matrix.png)
-
-### Reset
-
-**RST:** $FF - Reset - Runs the interpreter's initialization routine, resets all cached references to pointers. [CZVND] 1-Byte Instruction
-Implied
+![](/image/Opcode-Matrix.png)
 
 ### Data Transport Operations
 
-**CVM:** $00 - Copy a value into memory - Set/clears the following flags: [ZN] 4-Byte Instruction
-(D/I/DX/XI/IX)
-Direct
-Indirect
-Direct Indexed
-Indexed Indirect
-Indirect Indexed
+MHB = Memory High Byte; MLB = Memory Low Byte; IHB = Index High Byte; ILB = Index Low Byte
 
-**CMM:** $01 - Copy from one memory address to another. [ZN] 5-Byte Instruction
-(D/I/DX/XI/IX)
-Direct
-Indirect
-Direct Indexed
-Indexed Indirect
-Indirect Indexed
+**CVM** Copy a value into memory.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$00 MHB MLB|
+|Indirect        |$01 MHB MLB|
+|Direct Indexed  |$02 MHB MLB IHB ILB|
+|Indexed Indirect|$03 MHB MLB IHB ILB|
+|Indirect Indexed|$04 MHB MLB IHB ILB|
+
+Flags Affected: [-Z-N--]
+
+**CMM** Copy from one memory address to another.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$10 MHB MLB|
+|Indirect        |$11 MHB MLB|
+|Direct Indexed  |$12 MHB MLB IHB ILB|
+|Indexed Indirect|$13 MHB MLB IHB ILB|
+|Indirect Indexed|$14 MHB MLB IHB ILB|
+
+Flags Affected: [-Z-N--]
 
 ### Arithmetic Operations
 
-**ADC:** $02 - Add (with carry) two memory values, replacing the second location with result. [CZVN] 5-Byte Instruction
-(D/I/DX/XI/IX)
-Direct
-Indirect
-Direct Indexed
-Indexed Indirect
-Indirect Indexed
+**ADC** Add (with carry) two memory values, replacing the second location with result.
 
-**SBC:** $03 - Subtract (with borrow) two memory values, replacing the second location with result. The first value gets subtracted from the second. [CZVN] 5-Byte Instruction
-(D/I/DX/XI/IX)
-Direct
-Indirect
-Direct Indexed
-Indexed Indirect
-Indirect Indexed
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$20 MHB MLB|
+|Indirect        |$21 MHB MLB|
+|Direct Indexed  |$22 MHB MLB IHB ILB|
+|Indexed Indirect|$23 MHB MLB IHB ILB|
+|Indirect Indexed|$24 MHB MLB IHB ILB|
 
-**INC:** $04 - Increment memory by one. [ZN] 3-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+Flags Affected: [CZVN--]
 
-**DEC:** $05 - Decrement memory by one. [ZN] 3-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+**SBC** Subtract (with borrow) two memory values, replacing the second location with result. The first value gets subtracted from the second.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$30 MHB MLB|
+|Indirect        |$31 MHB MLB|
+|Direct Indexed  |$32 MHB MLB IHB ILB|
+|Indexed Indirect|$33 MHB MLB IHB ILB|
+|Indirect Indexed|$34 MHB MLB IHB ILB|
+
+Flags Affected: [CZVN--]
+
+**INC** Increment memory by one.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$35 MHB MLB|
+|Direct Indexed  |$36 MHB MLB IHB ILB|
+
+Flags Affected: [-Z-N--]
+
+**DEC** Decrement memory by one.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$37 MHB MLB|
+|Direct Indexed  |$38 MHB MLB IHB ILB|
+
+Flags Affected: [-Z-N--]
 
 ### Status Operations
 
-**CLC:** $06 - Clear the carry flag. [C] 1-Byte Instruction
-(IM)
-Implied
+**CLC** Clear the carry flag.
 
-**SEC:** $07 - Set the carry flag. [C] 1-Byte Instruction
-(IM)
-Implied
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied|$19|
 
-**CLV:** $08 - Clear overflow flag [V] 1-Byte Instruction
-(IM)
-Implied
+Flags Affected: [C------]
+
+**SEC** Set the carry flag.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied|$29|
+
+Flags Affected: [C------]
+
+**CLV** Clear overflow flag.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied|$39|
+
+Flags Affected: [--V----]
 
 ### Logical Operations
 
-**AND:** $09 - Logical AND two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+**AND** Logical AND two memory locations, replacing the second location with result.
 
-**ORM:** $0A - Logical OR two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$2C MHB MLB|
+|Direct Indexed  |$3C MHB MLB IHB ILB|
 
-**XOR:** $0B - Logical XOR two memory locations, replacing the second location with result. [ZN] 5-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+Flags Affected: [-Z-N--]
 
-**SHL:** $0C - Shifts all bits of a memory location left one position. 0 is shifted into bit-0 and the original bit-7 is shifted into the Carry. [CZN] 1-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+**ORM** Logical OR two memory locations, replacing the second location with result.
 
-**SHR:** $0D - Shifts all bits of a memory location right one position. 0 is shifted into bit-7 and the original bit-0 is shifted into the Carry. [CZN] 1-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$2D MHB MLB|
+|Direct Indexed  |$3D MHB MLB IHB ILB|
 
-**ROL:** $0E - Shifts all bits of a memory location left one position. The Carry is shifted into bit 0 and the original bit 7 is shifted into the Carry. [CZN] 1-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+Flags Affected: [-Z-N--]
 
-**ROR:** $0F - Shifts all bits of a memory location right one position. The Carry is shifted into bit 7 and the original bit 0 is shifted into the Carry. [CZN] 1-Byte Instruction
-(D/DX)
-Direct
-Direct Indexed
+**XOR** Logical XOR two memory locations, replacing the second location with result.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$2E MHB MLB|
+|Direct Indexed  |$3E MHB MLB IHB ILB|
+
+Flags Affected: [-Z-N--]
+
+**SHL** Shifts all bits of a memory location left one position. 0 is shifted into bit-0 and the original bit-7 is shifted into the Carry.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$0C MHB MLB|
+|Direct Indexed  |$1C MHB MLB IHB ILB|
+
+Flags Affected: [CZ-N--]
+
+**SHR** Shifts all bits of a memory location right one position. 0 is shifted into bit-7 and the original bit-0 is shifted into the Carry.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$0D MHB MLB|
+|Direct Indexed  |$1D MHB MLB IHB ILB|
+
+Flags Affected: [CZ-N--]
+
+**ROL** Shifts all bits of a memory location left one position. The Carry is shifted into bit 0 and the original bit 7 is shifted into the Carry.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$0E MHB MLB|
+|Direct Indexed  |$1E MHB MLB IHB ILB|
+
+Flags Affected: [CZ-N--]
+
+**ROR** Shifts all bits of a memory location right one position. The Carry is shifted into bit 7 and the original bit 0 is shifted into the Carry.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$0F MHB MLB|
+|Direct Indexed  |$1F MHB MLB IHB ILB|
+
+Flags Affected: [CZ-N--]
 
 ### Branch Operations
 
-**BCC:** $10 - Branch on carry clear. Branch to address if the carry flag is clear. (Sets the PC to a the new memory address). [] 3-Byte Instruction
-(R)
-Relative
+OFS = Offset  (Signed byte)
 
-**BCS:** $11 - Branch on carry set. Branch if the carry flag is set. [] 3-Byte Instruction
-(R)
-Relative
+**BCC** Branch on carry clear. Branch to address if the carry flag is clear. (Sets the PC to a the new memory address).
 
-**BNE:** $12 - Branch on non-zero. Branch if the zero flag is clear. [] 3-Byte Instruction
-(R)
-Relative
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$15 OFS|
 
-**BEQ:** $13 - Branch on zero. Branch if the zero flag is set. [] 3-Byte Instruction
-(R)
-Relative
+Flags Affected: [------]
 
-**BPL:** $14 - Branch on positive. Branch if the negative flag is clear. [] 3-Byte Instruction
-(R)
-Relative
+**BCS** Branch on carry set. Branch if the carry flag is set.
 
-**BMI:** $15 - Branch on negative. Branch if the negative flag is set. [] 3-Byte Instruction
-(R)
-Relative
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$25 OFS|
 
-**BVC:** $16 - Branch on overflow clear. Branch if the overflow flag is clear [] 3-Byte Instruction
-(R)
-Relative
+Flags Affected: [------]
 
-**BVS:** $17 - Branch on overflow set. Branch if the overflow flag is set. [] 3-Byte Instruction
-(R)
-Relative
+**BNE** Branch on non-zero. Branch if the zero flag is clear.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$16 OFS|
+
+Flags Affected: [------]
+
+**BEQ** Branch on zero. Branch if the zero flag is set.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$26 OFS|
+
+Flags Affected: [------]
+
+**BPL** Branch on positive. Branch if the negative flag is clear.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$17 OFS|
+
+Flags Affected: [------]
+
+**BMI** Branch on negative. Branch if the negative flag is set.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$27 OFS|
+
+Flags Affected: [------]
+
+**BVC** Branch on overflow clear. Branch if the overflow flag is clear.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$18 OFS|
+
+Flags Affected: [------]
+
+**BVS** Branch on overflow set. Branch if the overflow flag is set.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$28 OFS|
+
+Flags Affected: [------]
 
 ### Comparison Operations
 
-**CMP:** $18 - Compare two memory locations. Sets zero flag if values are identical. Sets carry flag if the first memory value is equal to or greater than the second memory value. [CZN] 5-Byte Instruction
-(D/I/DX/XI/IX)
-Direct
-Indirect
-Direct Indexed
-Indexed Indirect
-Indirect Indexed
+**CMP** Compare two memory locations. Sets zero flag if values are identical. Sets carry flag if the first memory value is equal to or greater than the second memory value.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct          |$05 MHB MLB|
+|Indirect        |$06 MHB MLB|
+|Direct Indexed  |$07 MHB MLB IHB ILB|
+|Indexed Indirect|$08 MHB MLB IHB ILB|
+|Indirect Indexed|$09 MHB MLB IHB ILB|
+
+Flags Affected: [CZ-N--]
 
 ### Program Control
 
-**JMP:** $19 - Set PC to new value, altering flow of program.[] 3-Byte Instruction
-(D/I)
-Direct
-Indirect
+**JMP** Set PC to new value, altering flow of program.
 
-**JSR:** $1A - Jump sub routine. Pushes the address of the next operation to the stack, then sets the PC to a new memory value. [] 3-Byte Instruction
-(D)
-Direct
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct    |$0A MHB MLB|
+|Indirect  |$0B MHB MLB|
 
-**RSR:** $1B - Return from subroutine, pop the stack value into the PC and continues evaluating from there. [] 1-Byte Instruction
-(IM)
-Implied
+Flags Affected: [------]
+
+**JSR** Jump sub routine. Pushes the address of the next operation to the stack, then sets the PC to a new memory value.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct    |$1A MHB MLB|
+
+Flags Affected: [------]
+
+**RSR** Return from subroutine, pop the stack value into the PC and continues evaluating from there.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied    |$1B|
+
+Flags Affected: [------]
 
 ### Stack Operations
 
-**PHM:** $1C - Push memory to stack. [] 3-Byte Instruction
-(D)
-Direct
+**PHM** Push memory to stack.
 
-**PHS:** $1D - Push status to stack. [] 1-Byte Instruction
-(IM)
-Implied
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct    |$2A MHB MLB|
 
-**PLM:** $1E - Pop from stack into memory locaton. [ZN] 3-Byte Instruction
-(D)
-Direct
+Flags Affected: [-Z-N--]
 
-**PLS:** $1F - Pop from stack into status register. [CZVN] 1-Byte Instruction
-(IM)
-Implied
+**PHS** Push status to stack.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied    |$2B|
+
+Flags Affected: [------]
+
+**PLM** Pop from stack into memory locaton.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Direct    |$3A MHB MLB|
+
+Flags Affected: [-Z-N--]
+
+**PLS** Pop from stack into status register.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied    |$3B|
+
+Flags Affected: [CZVN--]
+
+### Reset
+
+**RST** Reset - Runs the interpreter's initialization routine, resets all cached references to pointers.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied|$FF|
+
+Flags Affected: [CZVNDD]  
 
 ### Null Operations
 
-**NOP:** $20-$2F: No Operation - Does nothing. [] 3-Byte Instruction
+**NOP** No Operation - Does nothing.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied    |$3F, $8F and $BF|
+
+Flags Affected: [------]
