@@ -42,7 +42,9 @@ Example: If upon initialization pixels 2 and 3 contain $FF and $20, then the asc
 
 **Pixel 10** contains a pointer to the program counter. This points to the next instruction to be evaluated.
 
-**Pixel 12** contains a pointer to the status and direction register. Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). Bits 4-5 of this register contain the direction the PC is currently evaluating in. 00=right (default), 01=down, 10=left, 11=up. Bits 6 and 7 are unused but can be read from and written to.
+**Pixel 12** contains a pointer to the status and direction register. Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). These flags are changed by operations.
+
+Bits 4-5 of this register contain the direction the program is currently evaluating in. 00=right (default), 01=down, 10=left, 11=up. Bits 6 and 7 are unused but can be read from and written to. With the default calue of 00, the PC increments by 1 after each pixel is accessed. Setting this to down adds the width of the image to the PC instead (moving down one pixel); up subtracts the width; left decrements the PC instead of incrementing it.
 
 **Pixel 14** contains a pointer to the width of the canvas. Changing the value at the address pointed to by this value will dynamically change the width of the canvas. New pixels will be added with default values of $FF. Clipped pixels will be lost.
 
