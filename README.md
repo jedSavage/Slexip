@@ -94,7 +94,7 @@ The value at the memory location is fetched and the value at the index location 
 
 There are 64 operations which repeatafter $3F: $40 to $7F, $80 to $BF, etc. This repetition allows some freedom in choosing more than one color index for an operation. For example, the color indexes $35, $75, $B5, and $F5 are all INC instructions.
 
-![](/image/Opcode Matrix.png)
+![](/image/Opcode%20Matrix.png)
 
 ### Reset
 
