@@ -1,24 +1,30 @@
 # SLEXIP
 
-SLEXIP is a low level programming language that uses pixels as data. It was inspired by Piet, and the 6502 microprocessor. It is not as esoteric as Piet but still offeres the ability to visually represent code as pixels.
+SLEXIP is a low level programming language inspired by Piet and the 6502 microprocessor. It is not as esoteric as Piet but still visually represents code as pixels.
 
 ## Data Representation
 
-Programs for SLEXIP are written using GIF (index) images. The images must be 256 colors.  They can be any size up to the maximum limited by GIF standard. The colors chosen for each index do not matter for program execution.
+Programs for SLEXIP are written using GIF (index) images. The image must be 256 colors.  It can be any size up to the maximum limited by GIF standard (64k x 64k), however only the first 64k is addressable. The colors chosen for each index do not matter for program execution.
 
-SLEXIP also uses the image as its memory. As the program runs, the image changes. Altering memory locations alters the image.
+SLEXIP also uses the image as its memory. As the program runs, altering data in memory locations directly alters the image. The image can be used as a display in this way.
 
-Data is encoded into pixels. Each pixel can represent a value from 0 to 255 (1-byte). Larger value can be represented by using more than one pixel but must be interpreted as such by the program. Operations are 1-byte long and Memory addresses are 2-bytes (16-bits) long. Some operations do not require additional data, others may require a memory address or value which will be fetched from the pixel(s) following the operation pixel. The combination of operation and related data pixels is an Instruction. For example: $00 $42 $04 $B5 is a 4-byte instruction that copys (Operation $00 or CVM) the value of $42 into memory address $04B5. The $ character before the values indicate hexadecimal values. For decimal values, a # symbol will be used ($1F vs #31). If no symbol precedes the number, decimal can be assumed.
+Each pixel can represent a value from 0 to 255 (1-byte). This value not only denotes the color index, but the data value of the pixel that the interpreter uses. Operations are 1-byte long and Memory addresses are 2-bytes (16-bits) long. Some operations do not require additional data, others may require a memory address or value which will be fetched from the pixel(s) following the operation pixel. The combination of operation and related data pixels is an Instruction. For example: $00 $42 $04 $B5 is a 4-byte instruction that copies (Operation $00 or CVM) the value of $42 into memory address $04B5. The $ character before the values indicate hexadecimal values. For decimal values, a # symbol will be used throughout this document ($1F vs #31). If no symbol precedes the number, decimal can be assumed.
 
 ## Program initialization.
 
-The interpreter initializes itself based on the values contained in specific pixel locations. These pixel locations contain pointers to various memory addresses that will be used by the interpreter. The pixels can be changed immediately upon program execution as the values are cached before any code is executed. As memory addresses are 16-bit, each pointer takes up 2 pixels. The only way to change the pointer locations after initialization is to execute a reset ($FF or RST) operation.
+After loading a program (image) into memory, the interpreter caches the values contained in the first 18 pixel locations. These pixel locations contain pointers to various memory addresses that will be used by the interpreter. These pixels can be changed immediately upon program execution as the values are cached before any code is executed. Since memory addresses are 16-bit, each pointer takes up 2 pixels. The only way to change the pointer locations after initialization is to execute a reset ($FF or RST) operation. Note that the values in these locations are pointers to memory addresses not the memory addresses themselves (unless of course they point to themselves).
 
-**Pixel 0** (The first pixel) contains a pointer to the speed-value (24-bit) that the interpreter should evaluate each pixel at. A value of 0 halts program execution (if interpreter has debugging capabilities, manual stepping can be done). A value of 1 means to evaluate 1 pixel per second (useful for debugging). A value of 60 means to step through 60 pixels per second (60hz). Max value is 16777215 or approx 16.7mhz. The value at the location pointed to can be changed during program execution to change interpreter speed. Example: If upon initialization pixel 0 and 1 contain $02 and $FF, then the interpreter will look at pixel #767 and base it's speed upon the value it finds there.  When pixel #767 gets changed, the interpreter will update it's speed to match.
+**Pixel 0** (The first pixel) contains a pointer to the speed-value (24-bit) that the interpreter should evaluate each pixel at. A value of 0 halts program execution (if interpreter has debugging capabilities, manual stepping can be done). A value of 1 means to evaluate 1 pixel per second (useful for debugging). A value of 60 means to step through 60 pixels per second (60hz). Max value is 16777215 or approx 16.7mhz. The value at the location pointed to can be changed during program execution to change interpreter speed.
 
-**Pixel 2** contains the stack-pointer pointer. The top of the stack is pointed to at this location. The stack extends backwards from the pointed to location as it grows. The stack can be relocated during code execution by changing the value at the pointer location. When a value is pushed to the stack, the pointer value decrements by one. When a value is popped from the stack the pointer value is increased by one.
+Example: If upon initialization pixel 0 and 1 contain $02 and $FF, then the interpreter will look to pixel #767 and base it's speed upon the value it finds there.  When pixel #767 gets changed, the interpreter will update it's speed to match.
 
-**Pixel 4** contains a pointer to the IK (Input Key) register, which contains the 7-bit ascii key code of the current or last key pressed. Bit-7 of thes register will be set if a non-modifier key is currently being pressed down.
+**Pixel 2** contains the stack-pointer (SP) pointer. The top of the stack is pointed to at the location pointed to by this pixel (double pointer). The stack extends backwards from the pointed to location as it grows. The stack can be relocated during code execution by changing the value at the pointer location. When a value is pushed to the stack, the pointer value decrements by one. When a value is popped from the stack the pointer value is increased by one.
+
+Example: If upon initialization pixels 2 and 3 contain $55 and $0C, then the interpreter will look to pixel #21772 for the location of the top of the stack. If pixel #21772 and #21773 contains $00 and $FF then the top of the stack is located at pixel #255.
+
+**Pixel 4** contains a pointer to the IK (Input Key) register, which contains the 7-bit ascii key code of the last key pressed. Bit-7 of this register will be set if a non-modifier key is currently being pressed down.
+
+Example: If upon initialization pixels 2 and 3 contain $FF and $20, then the ascii value of the last key pressed will always be located at pixel #65312.
 
 **Pixel 6** contains a pointer to the MK (Modifier Key) register. The following bits are set when the appropriate key is being pressed down. They are cleared as soon as the key is released.
 	*Bit 0 - Up Arrow
@@ -54,17 +60,17 @@ Upon initialization or when a reset instruction is encountered:
 
 ## Instruction Set:
 
-There are 32 operations. Only the lower 5 bits of a pixel represent the operation so they repeat after $00 to $1F: $20 to $3F, $40 to $5F, etc... Up to $FE. $FF is the reset instruction and does not repeat. This repetition allows some freedom in choosing more than one color index where an instruction sits. For example, the color indexes $0E, $2E, $4E, $6E, $8E, $AE, $CE, and $EE are all INC instructions.
+There are 33 operations. Besides the Reset operation, only the lower 5 bits of a pixel are used so 32 operations repeat after operation $1F: $20 to $3F, $40 to $5F, etc... Up to $FE. $FF is the reset instruction and does not repeat. This repetition allows some freedom in choosing more than one color index for an operation. For example, the color indexes $0E, $2E, $4E, $6E, $8E, $AE, $CE, and $EE are all INC instructions.
 
 ### Reset
-**RST:** $FF - Reset - Runs the interpreter's initialization routine, resets all caches references to pointer. [] 1-Byte Instruction
+**RST:** $FF - Reset - Runs the interpreter's initialization routine, resets all cached references to pointers. [] 1-Byte Instruction
 
 ### Data Transport Operations
 **CVM:** $00 - Copy a value into memory - Set/clears the following flags: [ZN] 4-Byte Instruction
 
 **CMM:** $01 - Copy from one memory address to another. [ZN] 5-Byte Instruction
 
-### Arithmetic Opertions
+### Arithmetic Operations
 **ADC:** $02 - Add (with carry) two memory values, replacing the second location with result. [CZVN] 5-Byte Instruction
 
 **SBC:** $03 - Subtract (with borrow) two memory values, replacing the second location with result. The first value gets subtracted from the second. [CZVN] 5-Byte Instruction
@@ -133,7 +139,3 @@ There are 32 operations. Only the lower 5 bits of a pixel represent the operatio
 
 ### Null Operations
 **NOP:** $20-$2F: No Operation - Does nothing. [] 3-Byte Instruction
-
-
-
-
