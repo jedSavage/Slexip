@@ -6,21 +6,21 @@ SLEXIP is a low level programming language inspired by [Piet](http://www.dangerm
 
 ## Data Representation
 
-Programs for SLEXIP are written using GIF (index) images. The image must be 256 colors and can be any size up to the maximum limited by GIF standard (65535 x 65535), however only the first 65535 pixels are addressable. The colors chosen for each index do not matter for program execution. When reaching the end of the image, the program counter rolls over.
+Programs for SLEXIP are written using GIF (index) images. The image must be 256 colors and can be any size up to the maximum limited by GIF standard (65535 x 65535), however only the first 64k pixels are addressable. The colors chosen for each index do not matter for program execution. When reaching the end of the image, the program counter rolls over.
 
-SLEXIP uses the image as its code as well memory. As the program runs, altering data in memory directly alters the image. There is no console output - so the altering memory is the standard way of outputting data.
+SLEXIP uses the image as its code as well memory. As the program runs, altering data in memory directly alters the image. There is no console output - altering memory is the standard way of outputting data.
 
-Each pixel can represent a value from 0 to 255 (1-byte). This value not only denotes the color index, but the value of the memory in that pixel location. Operations are 1-byte long and Memory addresses are 2-bytes (16-bits) long. Some operations do not require additional data, others may require a memory address or value which will be fetched from the pixel(s) following the operation pixel. The combination of operation and related data pixels is an Instruction. For example: $00 $42 $04 $B5 is a 4-byte instruction that copies (Operation $00 or CVM) the value of $42 into memory address $04B5. The $ character before the values indicate hexadecimal values. For decimal values, a # symbol will be used throughout this document ($1F vs #31).
+Each pixel can represent a value from 0 to 255 (1-byte). This value not only denotes the color index, but the value of the memory in that pixel location. Operators are 1-byte long and Memory addresses are 2-bytes (16-bits) long. Some operators do not require additional data, others may require a memory address or value which will be fetched from the pixel(s) following the operator pixel. The combination of operator and related data pixels is an Instruction. For example: $00 $42 $04 $B5 is a 4-byte instruction that copies (operator $00 or CVM) the value of $42 into memory address $04B5. The $ character before the values indicate hexadecimal values. For decimal values, a # symbol will be used throughout this document ($1F vs #31).
 
 ## Program initialization.
 
-After loading a program (image) into memory, the interpreter caches the values contained in the first 18 pixel locations. These pixel locations contain pointers to various memory addresses that will be used by the interpreter. These pixels can be changed immediately upon program execution as the values are cached before any code is executed. Since memory addresses are 16-bits wide, each pointer takes up 2 pixels. The only way to change the cached locations after initialization is to execute a reset ($FF or RST) operation. Note that the values in these locations are **pointers** to memory addresses not the memory addresses themselves (unless of course they point to themselves).
+After loading a program (image) into memory, the interpreter caches the values contained in the first 18 pixel locations. These pixel locations contain pointers to various memory addresses that will be used by the interpreter. These pixels can be changed immediately upon program execution as the values are cached before any code is executed. Since memory addresses are 16-bits wide, each pointer takes up 2 pixels. The only way to change the cached locations after initialization is to execute a reset ($FF or RST) operator. Note that the values in these locations are **pointers** to memory addresses not the memory addresses themselves (unless of course they point to themselves).
 
 **Pixel 0** (The first pixel) contains a pointer to the speed-value (24-bit) that the interpreter should evaluate each pixel at. A value of #0 halts program execution (if interpreter has debugging capabilities, manual stepping can be done). A value of 1 means to evaluate 1 pixel per second (useful for debugging). A value of #60 means to step through 60 pixels per second (60hz). Max value is #16777215 ($FFFFFF) or approx 16.7mhz. The value at the location pointed to can be changed during program execution to change interpreter speed.
 
-Example: If upon initialization pixel 0 and 1 contain $02 and $FF reprectively, then the interpreter will look to pixels #767, #767, and #768 (24-bit) and base it's speed upon the values it finds there.  If any of those pixels are changed during program execution, the interpreter will update it's speed to match.
+Example: If upon initialization pixel 0 and 1 contain $02 and $FF reprectively, then the interpreter will look to pixels #767, #768, and #769 (24-bit) and base it's speed upon the values it finds there.  If any of those pixels are changed during program execution, the interpreter will update it's speed to match.
 
-**Pixel 2** contains the stack-pointer (SP) pointer. The top of the stack is pointed to at the location pointed to by this pixel **(double pointer)**. The stack extends backwards from the pointed to location as it grows. The stack can be relocated during code execution by changing the values at the pointer location. When a value is pushed to the stack, the pointer value decrements by one. When a value is popped from the stack the pointer value is increased by one.
+**Pixel 2** contains a pointer to the stack-pointer (SP). The top of the stack is pointed to at the location pointed to by this pixel **(double pointer)**. The stack extends backwards from the pointed to location as it grows. The stack can be relocated during code execution by changing the values at the pointer location. When a value is pushed to the stack, the pointer value decrements by one. When a value is popped from the stack the pointer value is increased by one.
 
 Example: If upon initialization pixels 2 and 3 contain $55 and $0C respectively, the interpreter will look to pixels #21772 and #21773 for the location of the top of the stack. If pixel #21772 and #21773 contains $00 and $FF respectively, then the top of the stack is located at pixel #255.
 
@@ -42,17 +42,17 @@ Example: If upon initialization pixels 2 and 3 contain $FF and $20 repectively, 
 
 **Pixel 10** contains a pointer to the program counter. This points to the next instruction to be evaluated.
 
-**Pixel 12** contains a pointer to the status and direction register. Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). These flags are changed by operations.
+**Pixel 12** contains a pointer to the status and direction register. Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). These flags are changed by operators.
 
-Bits 4-5 of this register contain the direction the program is currently evaluating in. 00=right (default), 01=down, 10=left, 11=up. Bits 6 and 7 are unused but can be read from and written to. With the default calue of 00, the PC increments by 1 after each pixel is accessed. Setting this to down adds the width of the image to the PC instead (moving down one pixel); up subtracts the width; left decrements the PC instead of incrementing it.
+Bits 4-5 of this register contain the direction the program is currently evaluating in. 00=right (default), 01=down, 10=left, 11=up. Bits 6 and 7 are unused but can be read from and written to. With the default calue of 00, the PC increments by 1 after each pixel is accessed, rolling over at the end of the image. Setting this to down adds the width of the image to the PC instead (moving down one pixel). Upon rolling over, 1 is also added to the PC; up subtracts the width (-1 upon roll over); left decrements the PC instead of incrementing it.
 
-**Pixel 14** contains a pointer to the width of the canvas. Changing the value at the address pointed to by this value will dynamically change the width of the canvas. New pixels will be added with default values of $FF. Clipped pixels will be lost.
+**Pixel 14** contains a pointer to the width of the canvas. Changing the value at the address pointed to by this value will dynamically change the width of the canvas. New pixels will be added with default values of $FF. Clipped pixels will be lost. The interpreter will update the image as needed.
 
-**Pixel 16** contains a pointer to the height of the canvas. Changing the value at the address pointed to by this value will dynamically change the height of the canvas. New pixels will be added with default values of $FF. Clipped pixels will be lost.
+**Pixel 16** contains a pointer to the height of the canvas. Changing the value at the address pointed to by this value will dynamically change the height of the canvas. New pixels will be added with default values of $FF. Clipped pixels will be lost. The interpreter will update the image as needed.
 
 Upon initialization or when a reset instruction is encountered:
 1) The interpreter caches the speed-value (SV) in pixel 1 and sets its speed to match 1/SV seconds. This is the speed at which each pixel should be evaluated.
-2) The interpreter caches the stack-pointer pointer (SPP). Calls to stack-based operations will use the value located at this pointer to point to the top of the stack.
+2) The interpreter caches the stack-pointer pointer (SPP). Calls to stack-based operators will use the value located at this pointer to point to the top of the stack.
 3) The interpreter caches the IK-pointer. The bits of this location will be modified accoring to keyboard input.
 4) The interpreter caches the MK-pointer. The bits of this location will be modified accoring to keyboard input.
 5) The interpreter caches the LFSR-pointer.
@@ -63,21 +63,21 @@ Upon initialization or when a reset instruction is encountered:
 10) The interpreter begins evaluating pixels at the address pointed to by the PC.
 
 ## Memory Addressing Modes
-There are seven modes that can be used with operations. Not all modes are available with all operations.
+There are seven modes that can be used with operators. Not all modes are available with all operators.
 
 ### Implied (IM)
-In implied mode, the data and/or memory that the operation works with is implied resulting in 1-byte instructions. Status operations, for example, work solely on the bits of the status register. The following operations run in implied mode: RST, CLC, SEC, CLV, RSR, PHS & PLS.
+In implied mode, the data and/or memory that the operator works with is implied resulting in single-byte instructions. Status operators, for example, work solely on the bits of the status register.
 
 ### Non-Indexed
 
 #### Relative (R)
-This mode is only available with branch operations. The number provided to the operation is added to current PC and program execution continues from that address. Only one byte is passed and it is a signed byte. This allows a jump of -128 to +127 bytes relative to the current program counter.
+This mode is only available with branch operators. The number provided to the operator is added to current PC and program execution continues from that address. Only one byte is passed and it is a signed byte. This allows a jump of -128 to +127 bytes relative to the current program counter.
 
 #### Direct (D)
-Uses the value directly as entered.  Example, using the JMP operation in direct mode, the PC is set to the value provided and program execution continues from that address.
+Uses the value directly as entered.  Example, using the JMP operator in direct mode, the PC is set to the value provided and program execution continues from that address.
 
 #### Indirect (I)
-Fetches the value from the provided memory address, and uses that value in the operation. Example, using the JMP operation in indirect mode: JMP $44 $02 - fetches the value from memory address $4402 and sets the PC to that value.
+Fetches the value from the provided memory address, and uses that value with the operator. Example, using the JMP operator in indirect mode: JMP $44 $02 - fetches the value from memory address $4402 and sets the PC to that value.
 
 ### Indexed
 
@@ -92,61 +92,61 @@ The value at the memory location is fetched and the value at the index location 
 
 ## Instruction Set:
 
-There are 64 operators which repeat every 64 bytes. This repetition allows some freedom in choosing more than one color index for each operation. For example, the color indexes $35, $75, $B5, and $F5 are all INC operators. The reset operator is $FF and is not repeated.  All other $xF opcodes are NOP instructions.
+There are 64 operators. The chart below shows their op-codes. All other opcodes are interpreted as NOP instructions.
 
 ![](/image/Opcode-Matrix.png)
 
-### Data Transport Operations
+### Data Transport operators
 
-MHB = Memory High Byte; MLB = Memory Low Byte; IHB = Index High Byte; ILB = Index Low Byte
+VAL = value; MHB = Memory High Byte; MLB = Memory Low Byte; IHB = Index High Byte; ILB = Index Low Byte
 
 **CVM** Copy a value into memory.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$00 MHB MLB|
-|Indirect        |$01 MHB MLB|
-|Direct Indexed  |$02 MHB MLB IHB ILB|
-|Indexed Indirect|$03 MHB MLB IHB ILB|
-|Indirect Indexed|$04 MHB MLB IHB ILB|
+|Direct          |$40 VAL MHB MLB|
+|Indirect        |$60 VAL MHB MLB|
+|Direct Indexed  |$C0 VAL MHB MLB IHB ILB|
+|Indexed Indirect|$80 VAL MHB MLB IHB ILB|
+|Indirect Indexed|$A0 VAL MHB MLB IHB ILB|
 
 Flags Affected: [-Z-N--]
 
-**CMM** Copy from one memory address to another.
+**CMM** Copy from first memory address to the second.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$10 MHB MLB|
-|Indirect        |$11 MHB MLB|
-|Direct Indexed  |$12 MHB MLB IHB ILB|
-|Indexed Indirect|$13 MHB MLB IHB ILB|
-|Indirect Indexed|$14 MHB MLB IHB ILB|
+|Direct          |$43 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Indirect        |$63 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$C3 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indexed Indirect|$83 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indirect Indexed|$A3 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [-Z-N--]
 
-### Arithmetic Operations
+### Arithmetic operators
 
-**ADC** Add (with carry) two memory values, replacing the second location with result.
+**ADC** Add (with carry) two memory values, replacing the first location with result. Indexed modes apply to the second memory address.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$20 MHB MLB|
-|Indirect        |$21 MHB MLB|
-|Direct Indexed  |$22 MHB MLB IHB ILB|
-|Indexed Indirect|$23 MHB MLB IHB ILB|
-|Indirect Indexed|$24 MHB MLB IHB ILB|
+|Direct          |$42 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Indirect        |$62 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$C2 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indexed Indirect|$82 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indirect Indexed|$A2 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZVN--]
 
-**SBC** Subtract (with borrow) two memory values, replacing the second location with result. The first value gets subtracted from the second.
+**SBC** Subtract (with borrow) two memory values, replacing the first memory location with result. The second memory value gets subtracted from the first. Indexed modes apply to the second memory address.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$30 MHB MLB|
-|Indirect        |$31 MHB MLB|
-|Direct Indexed  |$32 MHB MLB IHB ILB|
-|Indexed Indirect|$33 MHB MLB IHB ILB|
-|Indirect Indexed|$34 MHB MLB IHB ILB|
+|Direct          |$45 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Indirect        |$65 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$C5 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indexed Indirect|$85 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indirect Indexed|$A5 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZVN--]
 
@@ -154,8 +154,8 @@ Flags Affected: [CZVN--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$35 MHB MLB|
-|Direct Indexed  |$36 MHB MLB IHB ILB|
+|Direct          |$44 MHB MLB|
+|Direct Indexed  |$C4 MHB MLB IHB ILB|
 
 Flags Affected: [-Z-N--]
 
@@ -163,18 +163,18 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$37 MHB MLB|
-|Direct Indexed  |$38 MHB MLB IHB ILB|
+|Direct          |$47 MHB MLB|
+|Direct Indexed  |$C7 MHB MLB IHB ILB|
 
 Flags Affected: [-Z-N--]
 
-### Status Operations
+### Status operators
 
 **CLC** Clear the carry flag.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied|$19|
+|Implied|$E4|
 
 Flags Affected: [C------]
 
@@ -182,7 +182,7 @@ Flags Affected: [C------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied|$29|
+|Implied|$E5|
 
 Flags Affected: [C------]
 
@@ -190,36 +190,36 @@ Flags Affected: [C------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied|$39|
+|Implied|$E6|
 
 Flags Affected: [--V----]
 
-### Logical Operations
+### Logical operators
 
-**AND** Logical AND two memory locations, replacing the second location with result.
+**AND** Logical AND two memory locations, replacing the first memory location with result.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$2C MHB MLB|
-|Direct Indexed  |$3C MHB MLB IHB ILB|
+|Direct          |$46 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$C6 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [-Z-N--]
 
-**ORM** Logical OR two memory locations, replacing the second location with result.
+**ORM** Logical OR two memory locations, replacing the first memory location with result.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$2D MHB MLB|
-|Direct Indexed  |$3D MHB MLB IHB ILB|
+|Direct          |$49 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$C9 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [-Z-N--]
 
-**XOR** Logical XOR two memory locations, replacing the second location with result.
+**XOR** Logical XOR two memory locations, replacing the first memory location with result.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$2E MHB MLB|
-|Direct Indexed  |$3E MHB MLB IHB ILB|
+|Direct          |$48 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$C8 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [-Z-N--]
 
@@ -227,8 +227,8 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$0C MHB MLB|
-|Direct Indexed  |$1C MHB MLB IHB ILB|
+|Direct          |$4B MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$CB MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -236,8 +236,8 @@ Flags Affected: [CZ-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$0D MHB MLB|
-|Direct Indexed  |$1D MHB MLB IHB ILB|
+|Direct          |$4A MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$CA MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -245,8 +245,8 @@ Flags Affected: [CZ-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$0E MHB MLB|
-|Direct Indexed  |$1E MHB MLB IHB ILB|
+|Direct          |$4D MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$CD MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -254,24 +254,56 @@ Flags Affected: [CZ-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$0F MHB MLB|
-|Direct Indexed  |$1F MHB MLB IHB ILB|
+|Direct          |$4C MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$CC MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZ-N--]
 
-### Branch Operations
+### Branch operators
 
 OFS = Offset  (Signed byte)
 
-**BCC** Branch on carry clear. Branch to address if the carry flag is clear. (Sets the PC to a the new memory address).
+**BCC** Branch on carry clear - Branch to address if the carry flag is clear. (Increments the PC by OFS).
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Relative          |$15 OFS|
+|Relative          |$20 OFS|
 
 Flags Affected: [------]
 
-**BCS** Branch on carry set. Branch if the carry flag is set.
+**BCS** Branch on carry set - Branch if the carry flag is set.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$21 OFS|
+
+Flags Affected: [------]
+
+**BNE** Branch on non-zero - Branch if the zero flag is clear.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$22 OFS|
+
+Flags Affected: [------]
+
+**BEQ** Branch on zero - Branch if the zero flag is set.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$23 OFS|
+
+Flags Affected: [------]
+
+**BPL** Branch on positive - Branch if the negative flag is clear.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Relative          |$24 OFS|
+
+Flags Affected: [------]
+
+**BMI** Branch on negative - Branch if the negative flag is set.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
@@ -279,15 +311,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BNE** Branch on non-zero. Branch if the zero flag is clear.
-
-|Addressing Mode|Instruction Format|
-|---:|:---|
-|Relative          |$16 OFS|
-
-Flags Affected: [------]
-
-**BEQ** Branch on zero. Branch if the zero flag is set.
+**BVC** Branch on overflow clear - Branch if the overflow flag is clear.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
@@ -295,15 +319,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BPL** Branch on positive. Branch if the negative flag is clear.
-
-|Addressing Mode|Instruction Format|
-|---:|:---|
-|Relative          |$17 OFS|
-
-Flags Affected: [------]
-
-**BMI** Branch on negative. Branch if the negative flag is set.
+**BVS** Branch on overflow set - Branch if the overflow flag is set.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
@@ -311,33 +327,17 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BVC** Branch on overflow clear. Branch if the overflow flag is clear.
-
-|Addressing Mode|Instruction Format|
-|---:|:---|
-|Relative          |$18 OFS|
-
-Flags Affected: [------]
-
-**BVS** Branch on overflow set. Branch if the overflow flag is set.
-
-|Addressing Mode|Instruction Format|
-|---:|:---|
-|Relative          |$28 OFS|
-
-Flags Affected: [------]
-
-### Comparison Operations
+### Comparison operators
 
 **CMP** Compare two memory locations. Sets zero flag if values are identical. Sets carry flag if the first memory value is equal to or greater than the second memory value.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$05 MHB MLB|
-|Indirect        |$06 MHB MLB|
-|Direct Indexed  |$07 MHB MLB IHB ILB|
-|Indexed Indirect|$08 MHB MLB IHB ILB|
-|Indirect Indexed|$09 MHB MLB IHB ILB|
+|Direct          |$41 MHB MLB|
+|Indirect        |$61 MHB MLB|
+|Direct Indexed  |$C1 MHB MLB IHB ILB|
+|Indexed Indirect|$81 MHB MLB IHB ILB|
+|Indirect Indexed|$A1 MHB MLB IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -347,16 +347,16 @@ Flags Affected: [CZ-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$0A MHB MLB|
-|Indirect  |$0B MHB MLB|
+|Direct    |$4F MHB MLB|
+|Indirect  |$6F MHB MLB|
 
 Flags Affected: [------]
 
-**JSR** Jump sub routine. Pushes the address of the next operation to the stack, then sets the PC to a new memory value.
+**JSR** Jump sub routine. Pushes the address of the next operator to the stack, then sets the PC to a new memory value.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$1A MHB MLB|
+|Direct    |$4E MHB MLB|
 
 Flags Affected: [------]
 
@@ -364,17 +364,17 @@ Flags Affected: [------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied    |$1B|
+|Implied    |$EE|
 
 Flags Affected: [------]
 
-### Stack Operations
+### Stack operators
 
 **PHM** Push memory to stack.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$2A MHB MLB|
+|Direct    |$51 MHB MLB|
 
 Flags Affected: [-Z-N--]
 
@@ -382,7 +382,7 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied    |$2B|
+|Implied    |$F0|
 
 Flags Affected: [------]
 
@@ -390,7 +390,7 @@ Flags Affected: [------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$3A MHB MLB|
+|Direct    |$50 MHB MLB|
 
 Flags Affected: [-Z-N--]
 
@@ -398,7 +398,7 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied    |$3B|
+|Implied    |$F1|
 
 Flags Affected: [CZVN--]
 
@@ -412,17 +412,7 @@ Flags Affected: [CZVN--]
 
 Flags Affected: [CZVNDD]  
 
-### Null Operations
-
-**NOP** No Operation - Does nothing.
-
-|Addressing Mode|Instruction Format|
-|---:|:---|
-|Implied    |$3F, $8F and $BF|
-
-Flags Affected: [------]
-
-### Null Operations
+### GIF Index operators
 
 I = Index number; R = Red value; G = Green Value; B = Blue Value.
 
@@ -430,6 +420,16 @@ I = Index number; R = Red value; G = Green Value; B = Blue Value.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$2F I R B G|
+|Direct    |$5 F I R B G|
+
+Flags Affected: [------]
+
+### Null operators
+
+**NOP** No operator - Does nothing.
+
+|Addressing Mode|Instruction Format|
+|---:|:---|
+|Implied    |All Other Op-Codes|
 
 Flags Affected: [------]
