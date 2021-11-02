@@ -116,11 +116,11 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$43 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Indirect        |$63 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$C3 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
-|Indexed Indirect|$83 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
-|Indirect Indexed|$A3 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$41 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Indirect        |$61 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$C1 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indexed Indirect|$81 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indirect Indexed|$A1 VAL MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [-Z-N--]
 
@@ -142,11 +142,11 @@ Flags Affected: [CZVN--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$45 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Indirect        |$65 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$C5 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
-|Indexed Indirect|$85 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
-|Indirect Indexed|$A5 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$43 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Indirect        |$63 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$C3 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indexed Indirect|$83 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Indirect Indexed|$A3 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZVN--]
 
@@ -154,8 +154,8 @@ Flags Affected: [CZVN--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$44 MHB MLB|
-|Direct Indexed  |$C4 MHB MLB IHB ILB|
+|Direct          |$45 MHB MLB|
+|Direct Indexed  |$C5 MHB MLB IHB ILB|
 
 Flags Affected: [-Z-N--]
 
@@ -163,8 +163,8 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$47 MHB MLB|
-|Direct Indexed  |$C7 MHB MLB IHB ILB|
+|Direct          |$44 MHB MLB|
+|Direct Indexed  |$C4 MHB MLB IHB ILB|
 
 Flags Affected: [-Z-N--]
 
@@ -174,7 +174,7 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied|$E4|
+|Implied|$E0|
 
 Flags Affected: [C------]
 
@@ -182,7 +182,7 @@ Flags Affected: [C------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied|$E5|
+|Implied|$E1|
 
 Flags Affected: [C------]
 
@@ -190,7 +190,7 @@ Flags Affected: [C------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied|$E6|
+|Implied|$F0|
 
 Flags Affected: [--V----]
 
@@ -200,8 +200,8 @@ Flags Affected: [--V----]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$46 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$C6 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$50 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$D0 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [-Z-N--]
 
@@ -209,8 +209,8 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$49 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$C9 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$51 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$D1 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [-Z-N--]
 
@@ -218,8 +218,8 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$48 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$C8 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$52 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$D2 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [-Z-N--]
 
@@ -227,8 +227,8 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$4B MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$CB MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$53 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$D3 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -236,8 +236,8 @@ Flags Affected: [CZ-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$4A MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$CA MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$54 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$D4 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -245,8 +245,8 @@ Flags Affected: [CZ-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$4D MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$CD MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$55 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$D5 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -254,8 +254,8 @@ Flags Affected: [CZ-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$4C MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
-|Direct Indexed  |$CC MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
+|Direct          |$56 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub>|
+|Direct Indexed  |$D6 MHB<sub>1</sub> MLB<sub>1</sub> MHB<sub>2</sub> MLB<sub>2</sub> IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -333,11 +333,11 @@ Flags Affected: [------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct          |$41 MHB MLB|
-|Indirect        |$61 MHB MLB|
-|Direct Indexed  |$C1 MHB MLB IHB ILB|
-|Indexed Indirect|$81 MHB MLB IHB ILB|
-|Indirect Indexed|$A1 MHB MLB IHB ILB|
+|Direct          |$46 MHB MLB|
+|Indirect        |$66 MHB MLB|
+|Direct Indexed  |$C6 MHB MLB IHB ILB|
+|Indexed Indirect|$86 MHB MLB IHB ILB|
+|Indirect Indexed|$A6 MHB MLB IHB ILB|
 
 Flags Affected: [CZ-N--]
 
@@ -347,7 +347,7 @@ Flags Affected: [CZ-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$4F MHB MLB|
+|Direct    |$5F MHB MLB|
 |Indirect  |$6F MHB MLB|
 
 Flags Affected: [------]
@@ -356,7 +356,7 @@ Flags Affected: [------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$4E MHB MLB|
+|Direct    |$4F MHB MLB|
 
 Flags Affected: [------]
 
@@ -364,7 +364,7 @@ Flags Affected: [------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied    |$EE|
+|Implied    |$EF|
 
 Flags Affected: [------]
 
@@ -374,7 +374,7 @@ Flags Affected: [------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$51 MHB MLB|
+|Direct    |$4A MHB MLB|
 
 Flags Affected: [-Z-N--]
 
@@ -382,7 +382,7 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied    |$F0|
+|Implied    |$FA|
 
 Flags Affected: [------]
 
@@ -390,7 +390,7 @@ Flags Affected: [------]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$50 MHB MLB|
+|Direct    |$4B MHB MLB|
 
 Flags Affected: [-Z-N--]
 
@@ -398,7 +398,7 @@ Flags Affected: [-Z-N--]
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Implied    |$F1|
+|Implied    |$FB|
 
 Flags Affected: [CZVN--]
 
@@ -414,13 +414,13 @@ Flags Affected: [CZVNDD]
 
 ### GIF Index operators
 
-I = Index number; R = Red value; G = Green Value; B = Blue Value.
+IND = Index number; RVL = Red value; GVL = Green Value; BVL = Blue Value.
 
 **IDX** Index Color Modifier - Instructs the interpreter to change the color of an index.
 
 |Addressing Mode|Instruction Format|
 |---:|:---|
-|Direct    |$5 F I R B G|
+|Direct    |$5E IND RVL BVL GVL|
 
 Flags Affected: [------]
 
