@@ -12,67 +12,79 @@ SLEXIP uses the image as memory in addition to program data. As the program runs
 
 ## Numerical Representation
 
-Throughout this document a '$' character before any value denotes hexadecimal. For decimal values no sybmol will be used ($1F vs 31) and binary values will be repreented with a postfix 'b' (e.g. 00110110b).
+Throughout this document a `$` character before any value denotes hexadecimal. For decimal values no sybmol will be used (`$1F` vs `31`) and binary values will be repreented with a postfix `b` (e.g. `00110110b`).
 
 ## Memory
 
-Pixels are addressable using 2-byte words. The first pixel (pixel index 0) is located at $0000. Pixel addresses increase by 1 running front left to right. Addresses wrap around to the next line of pixels. In a 10x10 image, the last pixel on the 3rd line is $001D; the 1st pixel on the 4th line is $001E; and the last pixel on the last line is $0063.
+Pixels are addressable using 2-byte words. The first pixel (pixel index 0) is located at `$0000`. Pixel addresses increase by 1 running front left to right. Addresses wrap around to the next line of pixels. In a 10x10 image, the last pixel on the 3rd line is `$001D`; the 1st pixel on the 4th line is `$001E`; and the last pixel on the last line is `$0063`.
 
-Each pixel can represent a value from 0 to 255 (1-byte). This value also denotes the color index which that pixel should be displayed with. Operators are 1-byte long and Memory addresses are 2-bytes (16-bits) long. Some operators do not require additional data (operands), others may require a value and/or memory address which will be fetched from the pixel(s) following the operator. The combination of operator and operand is an Instruction. For example: $00 $42 $04 $B5 is a 4-byte instruction that copies (operator $00 or CVM) the value of $42 into memory address $04B5. 
+Each pixel can represent a value from `0` to `255` (1-byte). This value also denotes the color index which that pixel should be displayed with. Operators are 1-byte long and Memory addresses are 2-bytes (16-bits) long. Some operators do not require additional data (operands), others may require a value and/or memory address which will be fetched from the pixel(s) following the operator. The combination of operator and operand is an Instruction. For example: `$00` `$42` `$04` `$B5` is a 4-byte instruction that copies (operator `$00` or `CVM`) the value of `$42` into memory address `$04B5`. 
 
 ## Program Initialization.
 
-After loading a program (image) into memory, the interpreter caches the values contained in the first 18 pixel locations. These pixels contain **pointers** to various memory addresses that will be used by the interpreter. These pixels can be changed immediately upon program execution as the values are cached before any code is executed. Since memory addresses are 16-bits wide, each pointer takes up 2 pixels. The only way to change the cached locations after initialization is to execute a reset ($FF or RST) operator. Note that the values in these locations are **pointers** to memory addresses not the memory addresses themselves (unless of course they point to themselves).
+After loading a program (image) into memory, the interpreter caches the values contained in the first 18 pixel locations. These pixels contain **pointers** to various memory addresses that will be used by the interpreter. These pixels can be changed immediately upon program execution as the values are cached before any code is executed. Since memory addresses are 16-bits wide, each pointer takes up 2 pixels. The only way to change the cached locations after initialization is to execute a reset (`$FF` or `RST`) operator. Note that the values in these locations are **pointers** to memory addresses not the memory addresses themselves (unless of course they point to themselves).
 
 Once these pointers are cached, the interpreter beings executing code starting the the address stored in the Program Counter (PC).
 
 ### Initialization Pointers
 
-#### $0000 - Clock-Speed Register Initialization Pointer
+#### `$0000` - Clock-Speed Register Initialization Pointer
 
-The first pixel in the image contains the memory location of the clock-speed register (CS-Register).  This is a 24-bit register that the interpreter sets its speed by. A value of #0 halts program execution (if interpreter has debugging capabilities, manual stepping can be done). A value of 1 means to evaluate 1 pixel per second (useful for debugging). A value of #60 means to step through 60 pixels per second (60hz). Max value is #16777215 ($FFFFFF) or approx 16.7mhz. The value at the location pointed to can be changed during program execution to change interpreter speed.
+The first pixel in the image contains the memory location of the clock-speed register (CS-Register).  This is a 24-bit register that the interpreter sets its speed by. A value of `0` halts program execution (if interpreter has debugging capabilities, manual stepping can be done). A value of 1 means to evaluate 1 pixel per second (useful for debugging). A value of `60` means to step through 60 pixels per second (60hz). Max value is `16777215` (`$FFFFFF`) or approx 16.7mhz. The value at the location pointed to can be changed during program execution to change interpreter speed.
 
-#### $0002 - Stack-Pointer Initialization Pointer
+#### `$0002` - Stack-Pointer Initialization Pointer
 
 This pixel contains the memory location of the stack-pointer (SP). The SP is a 16-bit pointer containing the memory location of the top of the stack. The stack can be relocated during code execution by changing the values at the SP. The stack grows backwards: when a value is pushed to the stack, the pointer value decrements by one; when a value is popped from the stack the pointer value is increased by one.
 
-#### $0004 - Input-Key Register Initialization Pointer
+#### `$0004` - Input-Key Register Initialization Pointer
 
 This pixel contains the memory location of the Input-Key Register (IK-Register) - an 8-bit register whose lower 7-bits contain ascii key code of the last key pressed. Bit-7 of this register is set when a non-modifier key is pressed down.
 
-#### $0006 - Modifier-Key Register Initialization Pointer
+#### `$0006` - Modifier-Key Register Initialization Pointer
 
 This pixel contains the memory location of the Modifier-Key Register (MK-Register). an 8-bit register with the following bits set when the appropriate key is being pressed down. Bits are cleared as soon as the key is released.
-	*Bit 0 - Up Arrow
-	*Bit 1 - Down Arrow
-	*Bit 2 - Left Arrow
-	*Bit 3 - Right Arrow
-	*Bit 4 - Shift
-	*Bit 5 - Control
-	*Bit 6 - Alt
-	*Bit 7 - Command
+
+|Bit Position|Modifier Key|
+|:---:|:---|
+|`Bit 0`|Up Arrow|
+|`Bit 1`|Down Arrow|
+|`Bit 2`|Left Arrow|
+|`Bit 3`|Right Arrow|
+|`Bit 4`|Shift|
+|`Bit 5`|Control|
+|`Bit 6`|Alt|
+|`Bit 7`|Command|
 	
-#### $0008 - LFSR Initialization Pointer
+#### `$0008` - LFSR Initialization Pointer
 
-This pixel contains the memory location of a 16-bit Linear Feedback Shift Register (LFSR). Setting the LFRS to 0 turns off the LFSR feature. The LFSR progresses to the next output once every pixel evaluation. Changing the LFSR value to anything other than zero seeds the LFSR with that value.
+This pixel contains the memory location of a 16-bit Linear Feedback Shift Register (LFSR). Setting the LFRS to `$0000` turns off the LFSR feature. The LFSR progresses to the next output once every pixel evaluation. Changing the LFSR value to anything other than zero seeds the LFSR with that value.
 
-#### $0010 - Program-Counter Initialization Pointer
+#### `$0010` - Program-Counter Initialization Pointer
 
 This pixel contains the memory location of the program-counter (PC). The PC is a 16-bit pointer that contains the memory address of the next operator to be evaluated.
 
-#### $0012 - Status/Direction Register Initialization Pointer
+#### `$0012` - Status/Direction Register Initialization Pointer
 
 This pixel contains the memory location of the status/direction register (SD-Register). Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). These flags are changed by operators.
 
-Bits 4-5 of this register contain the direction the program is currently evaluating in. 00=right (default), 01=down, 10=left, 11=up. Bits 6 and 7 are unused but can be read from and written to. With the default value of 00, the PC increments by the size of each instruction after evaluation, rolling over at the end of the image.
+Bits 4-5 of this register contain the direction the program is currently evaluating in. Bits 6 and 7 are unused but can be read from and written to. With the default value of 00, the PC increments by the size of each instruction after evaluation, rolling over at the end of the image.
 
-#### $0014 - Canvas-Width Register Initialization Pointer
+|Bits 4 & 5|Program Direction|Effect on PC|Additional at Rollover|
+|:---:|:---|:---|:---:|
+|`00` |Right|`PC` = `PC` + `LEN`|None  |
+|`01` |Down |`PC` = `PC` + `CW-Register`       | + `1`|
+|`10` |Left |`PC` = `PC` - `LEN`|None  |
+|`11` |Up   |`PC` = `PC` - `CW-Register`       | - `1`|
 
-This pixel contains the memory location of the canvas-width Register (CW-Register). The CW-Register holds a 16-bit value representing the width of the canvas in pixels. Changing the value at the CW-Register will dynamically change the width of the canvas. New pixels will be added with a default value of $EE. Clipped pixels will be permanently lost. The interpreter will update the image as needed.
+`LEN` = byte-length of instruction (PC Offset Listed in Instruction Reference).
 
-#### $0016 - Canvas-Height Register Initialization Pointer
+#### `$0014` - Canvas-Width Register Initialization Pointer
 
-This pixel contains the memory location of the canvas-height Register (CH-Register). The CH-Register holds a 16-bit value representing the height of the canvas in pixels. Changing the value at the CH-Register will dynamically change the height of the canvas. New pixels will be added a default values of $EE. Clipped pixels will be permanently lost. The interpreter will update the image as needed.
+This pixel contains the memory location of the canvas-width Register (CW-Register). The CW-Register holds a 16-bit value representing the width of the canvas in pixels. Changing the value at the CW-Register will dynamically change the width of the canvas. New pixels will be added with a default value of `$EE`. Clipped pixels will be permanently lost. The interpreter will update the image as needed.
+
+#### `$0016` - Canvas-Height Register Initialization Pointer
+
+This pixel contains the memory location of the canvas-height Register (CH-Register). The CH-Register holds a 16-bit value representing the height of the canvas in pixels. Changing the value at the CH-Register will dynamically change the height of the canvas. New pixels will be added a default values of `$EE`. Clipped pixels will be permanently lost. The interpreter will update the image as needed.
 
 ## Memory Addressing Modes
 There are seven modes that can be used with operators. Not all modes are available with all operators.
@@ -83,13 +95,13 @@ In implied mode, the data and/or memory that the operator works with is implied 
 ### Non-Indexed
 
 #### Relative (R)
-This mode is only available with branch operators. The number provided to the operator is added to current PC and program execution continues from that address. Only one byte is passed and it is a signed byte. This allows a jump of -128 to +127 bytes relative to the current program counter.
+This mode is only available with branch operators. The number provided to the operator is added to current PC and program execution continues from that address. Only one byte is passed and it is a signed byte. This allows a jump of `-128` to `+127` bytes relative to the current program counter.
 
 #### Direct (D)
 Uses the value directly as entered.  Example, using the JMP operator in direct mode, the PC is set to the value provided and program execution continues from that address.
 
 #### Indirect (I)
-Fetches the value from the provided memory address, and uses that value with the operator. Example, using the JMP operator in indirect mode: JMP $44 $02 - fetches the value from memory address $4402 and sets the PC to that value.
+Fetches the value from the provided memory address, and uses that value with the operator. Example, using the JMP operator in indirect mode: `JMP` `$44` `$02` - fetches the value from memory address `$4402` and sets the PC to that value.
 
 ### Indexed
 
@@ -104,7 +116,7 @@ The value at the memory location is fetched and the value at the index location 
 
 ## Instruction Set:
 
-There are 64 operators. The chart below shows their op-codes. All other opcodes are interpreted as NOP instructions. Program Counter offsets listed are based upon the Direction Register bits being set to `00b`. For other direction configurations, see [Operator Evaluation Cycle, Step #4](#operator-evaluation-cycle).
+There are 64 operators. The chart below shows their op-codes. All other opcodes are interpreted as NOP instructions. Program Counter offsets listed are based upon the Direction Register bits being set to `00b`. For other direction configurations, see [Direction Register](#0012---statusdirection-register-initialization-pointer).
 
 ![](/image/Opcode-Matrix.png)
 
@@ -453,21 +465,9 @@ Flags Affected: [------]
 2. Depending on the operator, the operands are fetched from the memory following the operand.
 3. The full Instruction is evaluated, and any related memory is read from and written to.
 4. The flags of the status-register are updated to reflect the operation.
-5. The `PC` is incremented/decremented as neccesary depending on `SD-Register` bits `4` and `5`, and the length of the instruction.
-
-|`SD-Register` Bits 4 and 5|Evaluation Direction|Value added to PC|
-|:---:|:---:|:---:|
-|`00`|Right|`OFS`|
-|`01`|Down |`OFS` × `CW-Register`<sub>1</sub>|
-|`10`|Left |-`OFS`|
-|`11`|Up|-( `OFS` × `CW-Register` )<sub>2</sub>|
-
-<sub>`OFS` = byte-length of instruction (PC Offset Listed in Instruction Reference)</sub>  
-<sub>1 : Upon memory rollover to `$0000`, an additional 1 gets added to the `PC`.</sub>  
-<sub>2 : Upon memory rollover from `$0000`, an additional 1 gets subtracted from the `PC`.</sub>
-
+5. The `PC` is incremented/decremented as neccesary depending on `SD-Register` bits `4` and `5`, and the length of the instruction, see [Direction Register](#0012---statusdirection-register-initialization-pointer).
 6. The `LFRS` is incremented by the number instruction length.
 7. The `CS-Register` is read and the interpreter speed adjusted if needed.
 8. The `IK-Register` and `MK-Register` are both updated, depending on the keys currently pressed.
-9. The `CW-Register ` and 'CH-Register' are read and the image size displayed is adjusted if needed.
+9. The `CW-Register ` and `CH-Register` are read and the image size displayed is adjusted if needed.
 
