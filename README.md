@@ -28,19 +28,19 @@ Once these pointers are cached, the interpreter beings executing code starting t
 
 ### Initialization Pointers
 
-#### `$0000` - Clock-Speed Register Initialization Pointer
+#### ![Pixels $0000, $0001](badges/pixels-%240000%2C%20%240001-brightgreen.svg) - Clock-Speed Register Initialization Pointer
 
 The first pixel in the image contains the memory location of the clock-speed register (CS-Register).  This is a 24-bit register that the interpreter sets its speed by. A value of `0` halts program execution (if interpreter has debugging capabilities, manual stepping can be done). A value of 1 means to evaluate 1 pixel per second (useful for debugging). A value of `60` means to step through 60 pixels per second (60hz). Max value is `16777215` (`$FFFFFF`) or approx 16.7mhz. The value at the location pointed to can be changed during program execution to change interpreter speed.
 
-#### `$0002` - Stack-Pointer Initialization Pointer
+#### ![Pixels $0002, $0003](badges/pixels-%240002%2C%20%240003-brightgreen.svg) - Stack-Pointer Initialization Pointer
 
 This pixel contains the memory location of the stack-pointer (SP). The SP is a 16-bit pointer containing the memory location of the top of the stack. The stack can be relocated during code execution by changing the values at the SP. The stack grows backwards: when a value is pushed to the stack, the pointer value decrements by one; when a value is popped from the stack the pointer value is increased by one.
 
-#### `$0004` - Input-Key Register Initialization Pointer
+#### ![Pixels $0004, $0005](badges/pixels-%240004%2C%20%240005-brightgreen.svg) - Input-Key Register Initialization Pointer
 
 This pixel contains the memory location of the Input-Key Register (IK-Register) - an 8-bit register whose lower 7-bits contain ascii key code of the last key pressed. Bit-7 of this register is set when a non-modifier key is pressed down.
 
-#### `$0006` - Modifier-Key Register Initialization Pointer
+#### ![Pixels $0006, $0007](badges/pixels-%240006%2C%20%240007-brightgreen.svg) - Modifier-Key Register Initialization Pointer
 
 This pixel contains the memory location of the Modifier-Key Register (MK-Register). an 8-bit register with the following bits set when the appropriate key is being pressed down. Bits are cleared as soon as the key is released.
 
@@ -55,15 +55,15 @@ This pixel contains the memory location of the Modifier-Key Register (MK-Registe
 |`Bit 6`|Alt|
 |`Bit 7`|Command|
 	
-#### `$0008` - LFSR Initialization Pointer
+#### ![Pixels $0008, $0009](badges/pixels-%240008%2C%20%240009-brightgreen.svg) - LFSR Initialization Pointer
 
 This pixel contains the memory location of a 16-bit Linear Feedback Shift Register (LFSR). Setting the LFRS to `$0000` turns off the LFSR feature. The LFSR progresses to the next output once every pixel evaluation. Changing the LFSR value to anything other than zero seeds the LFSR with that value.
 
-#### `$0010` - Program-Counter Initialization Pointer
+#### ![Pixels $000A, $000B](badges/pixels-%24000A%2C%20%24000B-brightgreen.svg) - Program-Counter Initialization Pointer
 
 This pixel contains the memory location of the program-counter (PC). The PC is a 16-bit pointer that contains the memory address of the next operator to be evaluated.
 
-#### `$0012` - Status/Direction Register Initialization Pointer
+#### ![Pixels $000C, $000D](badges/pixels-%24000C%2C%20%24000D-brightgreen.svg) - Status/Direction Register Initialization Pointer
 
 This pixel contains the memory location of the status/direction register (SD-Register). Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). These flags are changed by operators.
 
@@ -78,11 +78,11 @@ Bits 4-5 of this register contain the direction the program is currently evaluat
 
 `LEN` = byte-length of instruction (PC Offset Listed in Instruction Reference).
 
-#### `$0014` - Canvas-Width Register Initialization Pointer
+#### ![Pixels $000E, $000F](badges/pixels-%24000E%2C%20%24000F-brightgreen.svg) - Canvas-Width Register Initialization Pointer
 
 This pixel contains the memory location of the canvas-width Register (CW-Register). The CW-Register holds a 16-bit value representing the width of the canvas in pixels. Changing the value at the CW-Register will dynamically change the width of the canvas. New pixels will be added with a default value of `$EE`. Clipped pixels will be permanently lost. The interpreter will update the image as needed.
 
-#### `$0016` - Canvas-Height Register Initialization Pointer
+#### ![Pixels $0010, $0011](badges/pixels-%240010%2C%20%240011-brightgreen.svg) - Canvas-Height Register Initialization Pointer
 
 This pixel contains the memory location of the canvas-height Register (CH-Register). The CH-Register holds a 16-bit value representing the height of the canvas in pixels. Changing the value at the CH-Register will dynamically change the height of the canvas. New pixels will be added a default values of `$EE`. Clipped pixels will be permanently lost. The interpreter will update the image as needed.
 
@@ -116,7 +116,7 @@ The value at the memory location is fetched and the value at the index location 
 
 ## Instruction Set:
 
-There are 64 operators. The chart below shows their op-codes. All other opcodes are interpreted as NOP instructions. Program Counter offsets listed are based upon the Direction Register bits being set to `00b`. For other direction configurations, see [Direction Register](#0012---statusdirection-register-initialization-pointer).
+There are 64 operators. The chart below shows their op-codes. All other opcodes are interpreted as `NOP` instructions. Program Counter offsets listed are based upon the Direction Register bits being set to `00b`. For other direction configurations, see [Direction Register](#pixels-000c-000d---statusdirection-register-initialization-pointer).
 
 ![](/image/Opcode-Matrix.png)
 
@@ -125,7 +125,7 @@ There are 64 operators. The chart below shows their op-codes. All other opcodes 
 `VAL` = value; `MHB`<sub>1</sub> = Memory<sub>1</sub> High Byte; `MLB`<sub>1</sub> = Memory<sub>1</sub> Low Byte;  
 `IHB` = Index High Byte; `ILB` = Index Low Byte
 
-**CVM** Copy a value into memory.
+**![CVM](badges/op-CVM-red.svg) - Copy a value into memory.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -137,7 +137,7 @@ There are 64 operators. The chart below shows their op-codes. All other opcodes 
 
 Flags Affected: [-Z-N--]
 
-**CMM** Copy from first memory address to the second.
+**![CMM](badges/op-CMM-red.svg) - Copy from first memory address to the second.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -151,7 +151,7 @@ Flags Affected: [-Z-N--]
 
 ### Arithmetic operators
 
-**ADC** Add (with carry) two memory values, replacing the first location with result. Indexed modes apply to the second memory address.
+**![ADC](badges/op-ADC-red.svg) - Add (with carry) two memory values, replacing the first location with result. Indexed modes apply to the second memory address.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -163,7 +163,7 @@ Flags Affected: [-Z-N--]
 
 Flags Affected: [CZVN--]
 
-**SBC** Subtract (with borrow) two memory values, replacing the first memory location with result. The second memory value gets subtracted from the first. Indexed modes apply to the second memory address.
+**![SBC](badges/op-SBC-red.svg) - Subtract (with borrow) two memory values, replacing the first memory location with result. The second memory value gets subtracted from the first. Indexed modes apply to the second memory address.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -175,7 +175,7 @@ Flags Affected: [CZVN--]
 
 Flags Affected: [CZVN--]
 
-**INC** Increment memory by one.
+**![INC](badges/op-INC-red.svg) -  Increment memory by one.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -184,7 +184,7 @@ Flags Affected: [CZVN--]
 
 Flags Affected: [-Z-N--]
 
-**DEC** Decrement memory by one.
+**![DEC](badges/op-DEC-red.svg) -  Decrement memory by one.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -195,7 +195,7 @@ Flags Affected: [-Z-N--]
 
 ### Status operators
 
-**CLC** Clear the carry flag.
+**![CLC](badges/op-CLC-red.svg) -  Clear the carry flag.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -203,7 +203,7 @@ Flags Affected: [-Z-N--]
 
 Flags Affected: [C------]
 
-**SEC** Set the carry flag.
+**![SEC](badges/op-SEC-red.svg) -  Set the carry flag.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -211,7 +211,7 @@ Flags Affected: [C------]
 
 Flags Affected: [C------]
 
-**CLV** Clear overflow flag.
+**![CLV](badges/op-CLV-red.svg) -  Clear overflow flag.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -221,7 +221,7 @@ Flags Affected: [--V----]
 
 ### Logical operators
 
-**AND** Logical AND two memory locations, replacing the first memory location with result.
+**![AND](badges/op-AND-red.svg) -  Logical AND two memory locations, replacing the first memory location with result.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -230,7 +230,7 @@ Flags Affected: [--V----]
 
 Flags Affected: [-Z-N--]
 
-**ORM** Logical OR two memory locations, replacing the first memory location with result.
+**![ORM](badges/op-ORM-red.svg) -  Logical OR two memory locations, replacing the first memory location with result.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -239,7 +239,7 @@ Flags Affected: [-Z-N--]
 
 Flags Affected: [-Z-N--]
 
-**XOR** Logical XOR two memory locations, replacing the first memory location with result.
+**![XOR](badges/op-XOR-red.svg) -  Logical XOR two memory locations, replacing the first memory location with result.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -248,7 +248,7 @@ Flags Affected: [-Z-N--]
 
 Flags Affected: [-Z-N--]
 
-**SHL** Shifts all bits of a memory location left one position. 0 is shifted into bit-0 and the original bit-7 is shifted into the Carry.
+**![SHL](badges/op-SHL-red.svg) -  Shifts all bits of a memory location left one position. 0 is shifted into bit-0 and the original bit-7 is shifted into the Carry.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -257,7 +257,7 @@ Flags Affected: [-Z-N--]
 
 Flags Affected: [CZ-N--]
 
-**SHR** Shifts all bits of a memory location right one position. 0 is shifted into bit-7 and the original bit-0 is shifted into the Carry.
+**![SHR](badges/op-SHR-red.svg) -  Shifts all bits of a memory location right one position. 0 is shifted into bit-7 and the original bit-0 is shifted into the Carry.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -266,7 +266,7 @@ Flags Affected: [CZ-N--]
 
 Flags Affected: [CZ-N--]
 
-**ROL** Shifts all bits of a memory location left one position. The Carry is shifted into bit 0 and the original bit 7 is shifted into the Carry.
+**![ROL](badges/op-ROL-red.svg) -  Shifts all bits of a memory location left one position. The Carry is shifted into bit 0 and the original bit 7 is shifted into the Carry.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -275,7 +275,7 @@ Flags Affected: [CZ-N--]
 
 Flags Affected: [CZ-N--]
 
-**ROR** Shifts all bits of a memory location right one position. The Carry is shifted into bit 7 and the original bit 0 is shifted into the Carry.
+**![ROR](badges/op-ROR-red.svg) -  Shifts all bits of a memory location right one position. The Carry is shifted into bit 7 and the original bit 0 is shifted into the Carry.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -288,7 +288,7 @@ Flags Affected: [CZ-N--]
 
 OFS = Offset  (Signed byte)
 
-**BCC** Branch on carry clear - Branch to address if the carry flag is clear. (Increments the PC by OFS).
+**![BCC](badges/op-BCC-red.svg) -  Branch on carry clear - Branch to address if the carry flag is clear. (Increments the PC by OFS).**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -296,7 +296,7 @@ OFS = Offset  (Signed byte)
 
 Flags Affected: [------]
 
-**BCS** Branch on carry set - Branch if the carry flag is set.
+**![BCS](badges/op-BCS-red.svg) -  Branch on carry set - Branch if the carry flag is set.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -304,7 +304,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BNE** Branch on non-zero - Branch if the zero flag is clear.
+**![BNE](badges/op-BNE-red.svg) -  Branch on non-zero - Branch if the zero flag is clear.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -312,7 +312,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BEQ** Branch on zero - Branch if the zero flag is set.
+**![BEQ](badges/op-BEQ-red.svg) -  Branch on zero - Branch if the zero flag is set.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -320,7 +320,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BPL** Branch on positive - Branch if the negative flag is clear.
+**![BPL](badges/op-BPL-red.svg) -  Branch on positive - Branch if the negative flag is clear.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -328,7 +328,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BMI** Branch on negative - Branch if the negative flag is set.
+**![BMI](badges/op-BMI-red.svg) -  Branch on negative - Branch if the negative flag is set.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -336,7 +336,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BVC** Branch on overflow clear - Branch if the overflow flag is clear.
+**![BVC](badges/op-BVC-red.svg) -  Branch on overflow clear - Branch if the overflow flag is clear.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -344,7 +344,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**BVS** Branch on overflow set - Branch if the overflow flag is set.
+**![BVS](badges/op-BVS-red.svg) -  Branch on overflow set - Branch if the overflow flag is set.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -354,7 +354,7 @@ Flags Affected: [------]
 
 ### Comparison operators
 
-**CMP** Compare two memory locations. Sets zero flag if values are identical. Sets carry flag if the first memory value is equal to or greater than the second memory value.
+**![CMP](badges/op-CMP-red.svg) -  Compare two memory locations. Sets zero flag if values are identical. Sets carry flag if the first memory value is equal to or greater than the second memory value.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -368,7 +368,7 @@ Flags Affected: [CZ-N--]
 
 ### Program Control
 
-**JMP** Set PC to new value, altering flow of program.
+**![JMP](badges/op-JMP-red.svg) -  Set PC to new value, altering flow of program.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -377,7 +377,7 @@ Flags Affected: [CZ-N--]
 
 Flags Affected: [------]
 
-**JSR** Jump sub routine. Pushes the address of the next operator to the stack, then sets the PC to a new memory value.
+**![JSR](badges/op-JSR-red.svg) -  Jump sub routine. Pushes the address of the next operator to the stack, then sets the PC to a new memory value.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -385,7 +385,7 @@ Flags Affected: [------]
 
 Flags Affected: [------]
 
-**RSR** Return from subroutine, pop the stack value into the PC and continues evaluating from there.
+**![RSR](badges/op-RSR-red.svg) -  Return from subroutine, pop the stack value into the PC and continues evaluating from there.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -395,7 +395,7 @@ Flags Affected: [------]
 
 ### Stack operators
 
-**PHM** Push memory to stack.
+**![PHS](badges/op-PHM-red.svg) -  Push memory to stack.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -403,7 +403,7 @@ Flags Affected: [------]
 
 Flags Affected: [-Z-N--]
 
-**PHS** Push status to stack.
+**![PHS](badges/op-PHS-red.svg) -  Push status to stack.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -411,7 +411,7 @@ Flags Affected: [-Z-N--]
 
 Flags Affected: [------]
 
-**PLM** Pop from stack into memory locaton.
+**![PLM](badges/op-PLM-red.svg) -  Pop from stack into memory locaton.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -419,7 +419,7 @@ Flags Affected: [------]
 
 Flags Affected: [-Z-N--]
 
-**PLS** Pop from stack into status register.
+**![PLS](badges/op-PLS-red.svg) -  Pop from stack into status register.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -429,7 +429,7 @@ Flags Affected: [CZVN--]
 
 ### Reset
 
-**RST** Reset - Runs the interpreter's initialization routine, resets all cached references to pointers.
+**![RST](badges/op-RST-red.svg) -  Reset - Runs the interpreter's initialization routine, resets all cached references to pointers.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -441,7 +441,7 @@ Flags Affected: [CZVNDD]
 
 `IND` = Index number; `RVL` = Red value; `GVL` = Green Value; `BVL` = Blue Value.
 
-**IDX** Index Color Modifier - Instructs the interpreter to change the color of an index.
+**![IDX](badges/op-IDX-red.svg) -  Index Color Modifier - Instructs the interpreter to change the color of an index.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -451,7 +451,7 @@ Flags Affected: [------]
 
 ### Null operators
 
-**NOP** No operator - Does nothing.
+**![NOP](badges/op-NOP-red.svg) -  No operator - Does nothing.**
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -465,9 +465,9 @@ Flags Affected: [------]
 2. Depending on the operator, the operands are fetched from the memory following the operand.
 3. The full Instruction is evaluated, and any related memory is read from and written to.
 4. The flags of the status-register are updated to reflect the operation.
-5. The `PC` is incremented/decremented as neccesary depending on `SD-Register` bits `4` and `5`, and the length of the instruction, see [Direction Register](#0012---statusdirection-register-initialization-pointer).
-6. The `LFRS` is incremented by the number instruction length.
-7. The `CS-Register` is read and the interpreter speed adjusted if needed.
+5. The `PC` is incremented/decremented as neccesary depending on `SD-Register` bits `4` and `5`, and the length of the instruction, see [Direction Register](#pixels-000c-000d---statusdirection-register-initialization-pointer).
+6. The `LFRS` is cycled the same amount as the instruction length.
+7. The `CS-Register` is read and the interpreter speed is adjusted if needed.
 8. The `IK-Register` and `MK-Register` are both updated, depending on the keys currently pressed.
 9. The `CW-Register ` and `CH-Register` are read and the image size displayed is adjusted if needed.
 
