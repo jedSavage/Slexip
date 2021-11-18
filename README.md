@@ -12,7 +12,7 @@ SLEXIP uses the image as memory in addition to program data. As the program runs
 
 ## Numerical Representation
 
-Throughout this document a `$` character before any value denotes hexadecimal. For decimal values no symbol will be used (`$1F` vs `31`) and binary values will be represented with a postfix `b` (e.g. `00110110b`).
+Throughout this document a `$` character before any value denotes hexadecimal. For decimal values no symbol will be used (`$1F` vs `31`) and binary values will be represented with a postfix `b` (e.g. `00110110b`). Negative numbers (signed bytes) are represented with a minus sign preceding them (`-127`). It is up to your program to interpret data as signed or unsigned.
 
 ## Memory
 
