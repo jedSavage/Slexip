@@ -57,7 +57,9 @@ This pixel contains the memory location of the Modifier-Key Register (MK-Registe
 	
 #### ![Pixels $0008, $0009](shields/pixels-%240008%2C%20%240009-brightgreen.svg) - LFSR Initialization Pointer
 
-This pixel contains the memory location of a 16-bit Linear Feedback Shift Register (LFSR). Setting the LFRS to `$0000` turns off the LFSR feature. The LFSR progresses to the next output once every pixel evaluation. Changing the LFSR value to anything other than zero seeds the LFSR with that value.
+This pixel contains the memory location of a 16-bit Linear Feedback Shift Register (LFSR) with taps at bits `15`, `13`, `12`, and `10`. The LFSR progresses to its next state once after every access. Changing the LFSR value to anything other than zero seeds the LFSR with that value and advances to the next state. Placing a value of `$0000` into the register effectively turns the LFSR off.
+
+![16-Bit LFSR](image/LFSR-F16.png)
 
 #### ![Pixels $000A, $000B](shields/pixels-%24000A%2C%20%24000B-brightgreen.svg) - Program-Counter Initialization Pointer
 
@@ -67,24 +69,41 @@ This pixel contains the memory location of the program-counter (PC). The PC is a
 
 This pixel contains the memory location of the status/direction register (SD-Register). Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). These flags are changed by operators.
 
-Bits 4-5 of this register contain the direction the program is currently evaluating in. Bits 6 and 7 are unused but can be read from and written to. With the default value of 00, the PC increments by the size of each instruction after evaluation, rolling over at the end of the image.
+|Bit Position|Description|
+|:---:|:---|
+|`Bit-0`|Carry Flag   |
+|`Bit-1`|Zero Flag    |
+|`Bit-2`|Overflow Flag|
+|`Bit-3`|Negative Flag|
 
-|Bits 4 & 5|Program Direction|Effect on PC|Additional at Rollover|
+Bits 4-5 of this register contain the direction the program is currently evaluating in. With the default value of 00, the PC increments by `1` each clock cycle, rolling over at the end of the image. These bits also affect how indexing is applied.
+
+|Bits 4 & 5|Program Direction|PC Change per Clock|Additional at Rollover|
 |:---:|:---|:---|:---:|
-|`00b` |Right|`PC` = `PC` + `LEN`|None  |
-|`01b` |Down |`PC` = `PC` + `CW-Register`       | + `1`|
-|`10b` |Left |`PC` = `PC` - `LEN`|None  |
-|`11b` |Up   |`PC` = `PC` - `CW-Register`       | - `1`|
+|`00b` |Right|+ `1`          |None  |
+|`01b` |Down |+ `CW-Register`| + `1`|
+|`10b` |Left |- `1`          |None  |
+|`11b` |Up   |- `CW-Register`| - `1`|
 
-`LEN` = byte-length of instruction (PC Offset Listed in Instruction Reference).
+Bits 6 and 7 are used to control the behavior of the LFSR. If bit-6 is set, the taps are mirrored so that the output progresses in the reverse order. Bit 7 controls how often the LFSR progresses to the next output. When set, the LFSR progresses once per clock tick.
+
+|Bit 6 State|LFSR Direction|
+|:---:|:---|
+|`0b`|Forward|
+|`1b`|Reverse|
+
+|Bit 7 State|LFSR Progression Behavior|
+|:---:|:---|
+|`0b`|Once after each read or write access|
+|`1b`|Once every clock tick|
 
 #### ![Pixels $000E, $000F](shields/pixels-%24000E%2C%20%24000F-brightgreen.svg) - Canvas-Width Register Initialization Pointer
 
-This pixel contains the memory location of the canvas-width Register (CW-Register). The CW-Register holds a 16-bit value representing the width of the canvas in pixels. Changing the value at the CW-Register will dynamically change the width of the canvas. New pixels will be added with a default value of `$EE`. Clipped pixels will be permanently lost. The interpreter will update the image as needed.
+This pixel contains the memory location of the canvas-width Register (CW-Register). The CW-Register holds a 16-bit value representing the width of the canvas in pixels. Changing the value at the CW-Register will dynamically change the width of the canvas. New pixels will be added with a default value of `$EE`. Clipped pixels will be permanently lost. The interpreter will update the displayed image as needed. Note that new pixels are added or removed from the end of memory, which can result in the image being distored after resizing.
 
 #### ![Pixels $0010, $0011](shields/pixels-%240010%2C%20%240011-brightgreen.svg) - Canvas-Height Register Initialization Pointer
 
-This pixel contains the memory location of the canvas-height Register (CH-Register). The CH-Register holds a 16-bit value representing the height of the canvas in pixels. Changing the value at the CH-Register will dynamically change the height of the canvas. New pixels will be added a default values of `$EE`. Clipped pixels will be permanently lost. The interpreter will update the image as needed.
+This pixel contains the memory location of the canvas-height Register (CH-Register), which work similarly to the CW-Register.
 
 ## Memory Addressing Modes
 There are seven modes that can be used with operators. Not all modes are available with all operators.
@@ -104,6 +123,8 @@ Uses the value directly as entered.  Example, using the JMP operator in direct m
 Fetches the value from the provided memory address, and uses that value with the operator. Example, using the JMP operator in indirect mode: `JMP` `$44` `$02` - fetches the value from memory address `$4402` and sets the PC to that value.
 
 ### Indexed
+
+Indexing follows the same rules as the program counter according to bits 4 & 5 of the `SD-Register`.
 
 #### Direct Indexed (DX)
 The value at the index location is added to the value provided. The sum is then used in the operation.
@@ -126,17 +147,13 @@ There are 64 operators. The chart below shows their op-codes. All other opcodes 
 ![VAL](shields/-VAL-pink.svg) = 1-Byte Value
 
 Memory addresses are 16-bits wide. Instruction use a high-byte followed by a low-byte to specify an address.  
-![MEM-HB](shields/MEM-HB-gray.svg) = Memory Address High Byte  
-![MEM-LB](shields/MEM-LB-gray.svg) = Memory Address Low Byte
-
-Where two memory addresses are used in an indexed mode, indexing applies to the 2nd (target) address.  
-![MEM1-HB](shields/SMEM-HB-gray.svg) = Source Memory High Byte  
-![MEM1-LB](shields/SMEM-LB-gray.svg) = Source Memory Low Byte  
-  
 ![MEM2-HB](shields/TMEM-HB-gray.svg) = Target Memory High Byte  
 ![MEM2-LB](shields/TMEM-LB-gray.svg) = Target Memory Low Byte
 
-Where two memory addresses are used in an indexed mode, indexing applies to the 2nd (target) address.  
+![MEM1-HB](shields/SMEM-HB-gray.svg) = Source Memory High Byte  
+![MEM1-LB](shields/SMEM-LB-gray.svg) = Source Memory Low Byte  
+  
+Where two memory addresses are used in an indexed mode, indexing applies to both source and target address.  
 ![IND-HB](shields/IND-HB-gray.svg) = Index High Byte  
 ![IND-LB](shields/IND-LB-gray.svg) = Index Low Byte
   
@@ -146,11 +163,11 @@ Copy a value into memory.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct          |![40](shields/opcodes/oc-40-red.svg) ![VAL](shields/-VAL-pink.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)            |+4|
-|Indirect        |![60](shields/opcodes/oc-60-red.svg) ![VAL](shields/-VAL-pink.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)            |+4|
-|Direct Indexed  |![C0](shields/opcodes/oc-C0-red.svg) ![VAL](shields/-VAL-pink.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+6|
-|Indexed Indirect|![80](shields/opcodes/oc-80-red.svg) ![VAL](shields/-VAL-pink.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+6|
-|Indirect Indexed|![A0](shields/opcodes/oc-A0-red.svg) ![VAL](shields/-VAL-pink.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+6|
+|Direct          |![40](shields/opcodes/oc-40-red.svg) ![VAL](shields/-VAL-pink.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)            |+4|
+|Indirect        |![60](shields/opcodes/oc-60-red.svg) ![VAL](shields/-VAL-pink.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)            |+4|
+|Direct Indexed  |![C0](shields/opcodes/oc-C0-red.svg) ![VAL](shields/-VAL-pink.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+6|
+|Indexed Indirect|![80](shields/opcodes/oc-80-red.svg) ![VAL](shields/-VAL-pink.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+6|
+|Indirect Indexed|![A0](shields/opcodes/oc-A0-red.svg) ![VAL](shields/-VAL-pink.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+6|
 
 ---
 ![CMM](shields/op-CMM-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
@@ -192,21 +209,21 @@ Subtract (with borrow) two memory values, replacing the first memory location wi
 
 ---
 ![INC](shields/op-INC-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
-Increment memory by one.
+Increment TMEMory by one.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct          |![45](shields/opcodes/oc-45-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)        |+3|
-|Direct Indexed  |![C5](shields/opcodes/oc-C5-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
+|Direct          |![45](shields/opcodes/oc-45-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)        |+3|
+|Direct Indexed  |![C5](shields/opcodes/oc-C5-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
 
 ---
 ![DEC](shields/op-DEC-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
-Decrement memory by one.
+Decrement TMEMory by one.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct          |![44](shields/opcodes/oc-44-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)        |+3|
-|Direct Indexed  |![C4](shields/opcodes/oc-C4-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
+|Direct          |![44](shields/opcodes/oc-44-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)        |+3|
+|Direct Indexed  |![C4](shields/opcodes/oc-C4-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
 
 ---
 ### Status operators
@@ -371,15 +388,15 @@ Branch on overflow set - Branch if the overflow flag is set.
 ### Comparison Operators
 
 ![CMP](shields/op-CMP-red.svg) ![Flags: [CZ-N--]](shields/flags/Flags-CZN-white.svg)  
-Compare two memory locations. Sets zero flag if values are identical. Sets carry flag if the first memory value is equal to or greater than the second memory value.
+Compare two TMEMory locations. Sets zero flag if values are identical. Sets carry flag if the first TMEMory value is equal to or greater than the second TMEMory value.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct          |![46](shields/opcodes/oc-46-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)        |+3|
-|Indirect        |![66](shields/opcodes/oc-66-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)        |+3|
-|Direct Indexed  |![C6](shields/opcodes/oc-C6-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
-|Indexed Indirect|![86](shields/opcodes/oc-86-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
-|Indirect Indexed|![A6](shields/opcodes/oc-A6-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
+|Direct          |![46](shields/opcodes/oc-46-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)        |+3|
+|Indirect        |![66](shields/opcodes/oc-66-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)        |+3|
+|Direct Indexed  |![C6](shields/opcodes/oc-C6-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
+|Indexed Indirect|![86](shields/opcodes/oc-86-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
+|Indirect Indexed|![A6](shields/opcodes/oc-A6-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+5|
 
 ---
 ### Program Control
@@ -389,16 +406,16 @@ Set PC to new value, altering flow of program.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct    |![5F](shields/opcodes/oc-5F-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)|Set to Memory|
-|Indirect  |![6F](shields/opcodes/oc-6F-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)|Set to Value at Memory|
+|Direct    |![5F](shields/opcodes/oc-5F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to TMEMory|
+|Indirect  |![6F](shields/opcodes/oc-6F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to Value at TMEMory|
 
 ---
 ![JSR](shields/op-JSR-red.svg) ![Flags: [------]](shields/flags/Flags-EMPTY-white.svg)  
-Jump sub routine. Pushes the address of the next operator to the stack, then sets the PC to a new memory value.
+Jump sub routine. Pushes the address of the next operator to the stack, then sets the PC to a new TMEMory value.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct    |![4F](shields/opcodes/oc-4F-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)|Set to Memory|
+|Direct    |![4F](shields/opcodes/oc-4F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to TMEMory|
 
 ---
 ![RSR](shields/op-RSR-red.svg) ![Flags: [------]](shields/flags/Flags-EMPTY-white.svg)  
@@ -412,11 +429,11 @@ Return from subroutine, pop the stack value into the PC and continues evaluating
 ### Stack operators
 
 ![PHS](shields/op-PHM-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
-Push memory to stack.
+Push TMEMory to stack.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct    |![4A](shields/opcodes/oc-4A-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)|+3|
+|Direct    |![4A](shields/opcodes/oc-4A-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|+3|
 
 ---
 ![PHS](shields/op-PHS-red.svg) ![Flags: [------]](shields/flags/Flags-EMPTY-white.svg)  
@@ -428,11 +445,11 @@ Push status to stack.
 
 ---
 ![PLM](shields/op-PLM-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
-Pop from stack into memory locaton.
+Pop from stack into TMEMory locaton.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct    |![4B](shields/opcodes/oc-4B-red.svg) ![MEM-HB](shields/MEM-HB-gray.svg) ![MEM-LB](shields/MEM-LB-gray.svg)|+3|
+|Direct    |![4B](shields/opcodes/oc-4B-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|+3|
 
 ---
 ![PLS](shields/op-PLS-red.svg) ![Flags: [CZVN--]](shields/flags/Flags-CZVN-white.svg)  
