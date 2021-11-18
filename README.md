@@ -38,11 +38,11 @@ This pixel contains the memory location of the stack-pointer (SP). The SP is a 1
 
 #### ![Pixels $0004, $0005](shields/pixels-%240004%2C%20%240005-brightgreen.svg) - Input-Key Register Initialization Pointer
 
-This pixel contains the memory location of the Input-Key Register (IK-Register) - an 8-bit register whose lower 7-bits contain ascii key code of the last key pressed. Bit-7 of this register is set when a non-modifier key is pressed down.
+This pixel contains the memory location of the Input-Key Register (IK-Register) - an 8-bit register whose lower 7-bits contain ascii key code of the last key pressed. Bit-7 of this register is set when a non-modifier key is pressed down. This register is updated each clock cycle.
 
 #### ![Pixels $0006, $0007](shields/pixels-%240006%2C%20%240007-brightgreen.svg) - Modifier-Key Register Initialization Pointer
 
-This pixel contains the memory location of the Modifier-Key Register (MK-Register). an 8-bit register with the following bits set when the appropriate key is being pressed down. Bits are cleared as soon as the key is released.
+This pixel contains the memory location of the Modifier-Key Register (MK-Register). an 8-bit register with the following bits set when the appropriate key is being pressed down. Bits are cleared as soon as the key is released. This register is updated each clock cycle.
 
 |Bit Position|Modifier Key|
 |:---:|:---|
@@ -61,13 +61,15 @@ This pixel contains the memory location of a 16-bit Linear Feedback Shift Regist
 
 ![16-Bit LFSR](image/LFSR-F16.png)
 
+The last 2 bits of the `SD-Register` affect the behavior of the LFSR.
+
 #### ![Pixels $000A, $000B](shields/pixels-%24000A%2C%20%24000B-brightgreen.svg) - Program-Counter Initialization Pointer
 
-This pixel contains the memory location of the program-counter (PC). The PC is a 16-bit pointer that contains the memory address of the next operator to be evaluated.
+This pixel contains the memory location of the program-counter (PC). The PC is a 16-bit pointer that contains the memory address of the next operator to be evaluated. The value here is automatically incremented/decremented depending on the `sd-register` and the instruction being evaluated. Writing a value to the program counter will change where the next instruction will be read from, though the instruction of writing will itself modify the register after the write takes place.
 
 #### ![Pixels $000C, $000D](shields/pixels-%24000C%2C%20%24000D-brightgreen.svg) - Status/Direction Register Initialization Pointer
 
-This pixel contains the memory location of the status/direction register (SD-Register). Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). These flags are changed by operators.
+This pixel contains the memory location of the status/direction register (SD-Register). Bits 0-3 contain the status flags. Bit-0 is the Carry flag (C), Bit-1 is the Zero flag (Z), Bit-2 is the Overflow flag (V), bit-3 is the Negative flag (N). Though you can write to these bits directly, they are usually changed by operators.
 
 |Bit Position|Description|
 |:---:|:---|
@@ -85,12 +87,12 @@ Bits 4-5 of this register contain the direction the program is currently evaluat
 |`10b` |Left |- `1`          |None  |
 |`11b` |Up   |- `CW-Register`| - `1`|
 
-Bits 6 and 7 are used to control the behavior of the LFSR. If bit-6 is set, the taps are mirrored so that the output progresses in the reverse order. Bit 7 controls how often the LFSR progresses to the next output. When set, the LFSR progresses once per clock tick.
+Bits 6 and 7 are used to control the behavior of the LFSR. If bit-6 is set, the taps are mirrored so that the output progresses in the reverse order. Bit 7 controls how often the LFSR progresses to the next output. When clear, the LFSR progresses once after each read or write access; when set, the LFSR progresses once per clock tick.
 
 |Bit 6 State|LFSR Direction|
 |:---:|:---|
-|`0b`|Forward|
-|`1b`|Reverse|
+|`0b`|Normal (Forward)|
+|`1b`|Mirrored (Reverse)|
 
 |Bit 7 State|LFSR Progression Behavior|
 |:---:|:---|
