@@ -153,9 +153,10 @@ Memory addresses are 16-bits wide. Instruction use a high-byte followed by a low
 ![MEM1-HB](shields/SMEM-HB-gray.svg) = Source Memory High Byte  
 ![MEM1-LB](shields/SMEM-LB-gray.svg) = Source Memory Low Byte  
   
-Where two memory addresses are used in an indexed mode, indexing applies to both source and target address.  
-![IND-HB](shields/IND-HB-gray.svg) = Index High Byte  
-![IND-LB](shields/IND-LB-gray.svg) = Index Low Byte
+Indexes are also memory addresses. The value at the address contains the index offset.
+![IND-HB](shields/IND-HB-gray.svg) = Index Memory High Byte  
+![IND-LB](shields/IND-LB-gray.svg) = Index Memory Low Byte  
+Where two memory addresses are used in an indexed mode, indexing applies to both source and target address.
   
 ---
 ![CVM](shields/op-CVM-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
