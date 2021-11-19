@@ -120,11 +120,24 @@ In implied mode, the data and/or memory that the operator works with is implied 
 #### Relative (R)
 This mode is only available with branch operators. The number provided to the operator is added to current PC and program execution continues from that address. Only one byte is passed and it is a signed byte. This allows a jump of `-128` to `+127` bytes relative to the current program counter.
 
+```
+BCC -50 ; If Carry flag is Clear, Branch back 50 bytes/pixels.
+```
+
 #### Direct (D)
 Uses the value directly as entered.  Example, using the JMP operator in direct mode, the PC is set to the value provided and program execution continues from that address.
 
+```
+JMP $2A00 ; Jump to memory location $2A00 (Pixel 10752)
+```
+
+
 #### Indirect (I)
 Fetches the value from the provided memory address, and uses that value with the operator. Example, using the JMP operator in indirect mode: `JMP` `$44` `$02` - fetches the value from memory address `$4402` and sets the PC to that value.
+
+```
+JMP ($2A00) ; Fetch value from memory location $2A00 & $2A01 and jump to that location.
+```
 
 ### Indexed
 
@@ -132,6 +145,10 @@ Indexing follows the same rules as the program counter according to bits 4 & 5 o
 
 #### Direct Indexed (DX)
 The value at the index location is added to the value provided. The sum is then used in the operation.
+
+```
+ADC $0080, $0100, $0090 ; Offset value at $0090. Add value at memory location $0100+offet to value at memory $0080+offset. Store result at memory $0080+offset.
+```
 
 #### Indexed Indirect (XI)
 The value at the index location is added to the memory address provided. The value at the new location is then used in the operation.
