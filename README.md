@@ -291,8 +291,8 @@ Shifts all bits of a memory location left one position. 0 is shifted into bit-0 
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct          |![53](shields/opcodes/oc-53-red.svg) ![MEM1-HB](shields/SMEM-HB-gray.svg) ![MEM1-LB](shields/SMEM-LB-gray.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg)        |+5|
-|Direct Indexed  |![D3](shields/opcodes/oc-D3-red.svg) ![MEM1-HB](shields/SMEM-HB-gray.svg) ![MEM1-LB](shields/SMEM-LB-gray.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+7|
+|Direct          |![53](shields/opcodes/oc-53-red.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg)        |+5|
+|Direct Indexed  |![D3](shields/opcodes/oc-D3-red.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+7|
 
 ---
 ![SHR](shields/op-SHR-red.svg) ![Flags: [CZ-N--]](shields/flags/Flags-CZN-white.svg)  
@@ -300,8 +300,8 @@ Shifts all bits of a memory location right one position. 0 is shifted into bit-7
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct          |![54](shields/opcodes/oc-54-red.svg) ![MEM1-HB](shields/SMEM-HB-gray.svg) ![MEM1-LB](shields/SMEM-LB-gray.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg)        |+5|
-|Direct Indexed  |![D4](shields/opcodes/oc-D4-red.svg) ![MEM1-HB](shields/SMEM-HB-gray.svg) ![MEM1-LB](shields/SMEM-LB-gray.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+7|
+|Direct          |![54](shields/opcodes/oc-54-red.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg)        |+5|
+|Direct Indexed  |![D4](shields/opcodes/oc-D4-red.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+7|
 
 ---
 ![ROL](shields/op-ROL-red.svg) ![Flags: [CZ-N--]](shields/flags/Flags-CZN-white.svg)  
@@ -309,8 +309,8 @@ Shifts all bits of a memory location left one position. The Carry is shifted int
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct          |![55](shields/opcodes/oc-55-red.svg) ![MEM1-HB](shields/SMEM-HB-gray.svg) ![MEM1-LB](shields/SMEM-LB-gray.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg)        |+5|
-|Direct Indexed  |![D5](shields/opcodes/oc-D5-red.svg) ![MEM1-HB](shields/SMEM-HB-gray.svg) ![MEM1-LB](shields/SMEM-LB-gray.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+7|
+|Direct          |![55](shields/opcodes/oc-55-red.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg)        |+5|
+|Direct Indexed  |![D5](shields/opcodes/oc-D5-red.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+7|
 
 ---
 ![ROR](shields/op-ROR-red.svg) ![Flags: [CZ-N--]](shields/flags/Flags-CZN-white.svg)  
@@ -318,8 +318,8 @@ Shifts all bits of a memory location right one position. The Carry is shifted in
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct          |![56](shields/opcodes/oc-56-red.svg) ![MEM1-HB](shields/SMEM-HB-gray.svg) ![MEM1-LB](shields/SMEM-LB-gray.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg)        |+5|
-|Direct Indexed  |![D6](shields/opcodes/oc-D6-red.svg) ![MEM1-HB](shields/SMEM-HB-gray.svg) ![MEM1-LB](shields/SMEM-LB-gray.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+7|
+|Direct          |![56](shields/opcodes/oc-56-red.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg)        |+5|
+|Direct Indexed  |![D6](shields/opcodes/oc-D6-red.svg) ![MEM2-HB](shields/TMEM-HB-gray.svg) ![MEM2-LB](shields/TMEM-LB-gray.svg) ![IND-HB](shields/IND-HB-gray.svg) ![IND-LB](shields/IND-LB-gray.svg)|+7|
 
 ---
 ### Branch operators
