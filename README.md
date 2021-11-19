@@ -18,6 +18,8 @@ Throughout this document a `$` character before any value denotes hexadecimal. F
 
 Pixels are addressable using 2-byte words. The first pixel (pixel index 0) is located at `$0000`. Pixel addresses increase by 1 running from left to right. Addresses wrap around to the next line of pixels. In a 10x10 image, the last pixel on the 3rd line is `$001D`; the 1st pixel on the 4th line is `$001E`; and the last pixel on the last line is `$0063`.
 
+![Example of 10x10 Image](image/Image-as-Memory.png)
+
 Each pixel can represent a value from `0` to `255` (1-byte). This value also denotes the color index which that pixel should be displayed with. Operators are 1-byte long and Memory addresses are 2-bytes (16-bits) long. Some operators do not require additional data (operands), others may require a value and/or memory address which will be fetched from the pixel(s) following the operator. The combination of operator and operand is an Instruction. For example: `$40` `$42` `$04` `$B5` is a 4-byte instruction that copies (`CVM` in Direct Mode or `$40`) the value of `$42` into memory address `$04B5`.
 
 ## Program Initialization.
@@ -212,7 +214,7 @@ Subtract (with borrow) two memory values, replacing the first memory location wi
 
 ---
 ![INC](shields/op-INC-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
-Increment TMEMory by one.
+Increment Memory by one.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -221,7 +223,7 @@ Increment TMEMory by one.
 
 ---
 ![DEC](shields/op-DEC-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
-Decrement TMEMory by one.
+Decrement Memory by one.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -391,7 +393,7 @@ Branch on overflow set - Branch if the overflow flag is set.
 ### Comparison Operators
 
 ![CMP](shields/op-CMP-red.svg) ![Flags: [CZ-N--]](shields/flags/Flags-CZN-white.svg)  
-Compare two TMEMory locations. Sets zero flag if values are identical. Sets carry flag if the first TMEMory value is equal to or greater than the second TMEMory value.
+Compare two Memory locations. Sets zero flag if values are identical. Sets carry flag if the first Memory value is equal to or greater than the second Memory value.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -409,16 +411,16 @@ Set PC to new value, altering flow of program.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct    |![5F](shields/opcodes/oc-5F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to TMEMory|
-|Indirect  |![6F](shields/opcodes/oc-6F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to Value at TMEMory|
+|Direct    |![5F](shields/opcodes/oc-5F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to Memory|
+|Indirect  |![6F](shields/opcodes/oc-6F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to Value at Memory|
 
 ---
 ![JSR](shields/op-JSR-red.svg) ![Flags: [------]](shields/flags/Flags-EMPTY-white.svg)  
-Jump sub routine. Pushes the address of the next operator to the stack, then sets the PC to a new TMEMory value.
+Jump sub routine. Pushes the address of the next operator to the stack, then sets the PC to a new Memory value.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
-|Direct    |![4F](shields/opcodes/oc-4F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to TMEMory|
+|Direct    |![4F](shields/opcodes/oc-4F-red.svg) ![TMEM-HB](shields/TMEM-HB-gray.svg) ![TMEM-LB](shields/TMEM-LB-gray.svg)|Set to Memory|
 
 ---
 ![RSR](shields/op-RSR-red.svg) ![Flags: [------]](shields/flags/Flags-EMPTY-white.svg)  
@@ -432,7 +434,7 @@ Return from subroutine, pop the stack value into the PC and continues evaluating
 ### Stack operators
 
 ![PHS](shields/op-PHM-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
-Push TMEMory to stack.
+Push Memory to stack.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
@@ -448,7 +450,7 @@ Push status to stack.
 
 ---
 ![PLM](shields/op-PLM-red.svg) ![Flags: [-Z-N--]](shields/flags/Flags-ZN-white.svg)  
-Pop from stack into TMEMory locaton.
+Pop from stack into Memory locaton.
 
 |Addressing Mode|Instruction Format|PC Offset|
 |---:|:---|:---|
